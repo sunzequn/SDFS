@@ -2,7 +2,9 @@ package com.sunzequn.sdfs.socket.client;
 
 import java.io.IOException;
 import java.io.ObjectOutputStream;
+import java.net.InetAddress;
 import java.net.Socket;
+import java.net.UnknownHostException;
 
 /**
  * Created by Sloriac on 2016/12/16.
@@ -10,18 +12,26 @@ import java.net.Socket;
 public class SockClient {
 
     private String serverIp;
-    private int port;
+    private int ServerPort;
+
+    private String clientIp;
+    private int clientPort;
+
+    private String id;
     private Socket socket;
     private long lastTime;
 
-    public SockClient(String serverIp, int port) {
+    public SockClient(String serverIp, int serverPort, String clientIp, int clientPort, String id) {
         this.serverIp = serverIp;
-        this.port = port;
+        ServerPort = serverPort;
+        this.clientIp = clientIp;
+        this.clientPort = clientPort;
+        this.id = id;
     }
 
     public void start() {
         try {
-            socket = new Socket(serverIp, port);
+            socket = new Socket(serverIp, ServerPort);
             lastTime = System.currentTimeMillis();
             new Thread(new KeepAliveHandler(lastTime, this)).start();
             new Thread(new ReceiveHandler(socket, this)).start();
@@ -53,9 +63,28 @@ public class SockClient {
         System.out.println("收到信息: " + t);
     }
 
+    public String getId() {
+        return id;
+    }
+
+    public String getServerIp() {
+        return serverIp;
+    }
+
+    public int getServerPort() {
+        return ServerPort;
+    }
+
+    public String getClientIp() {
+        return clientIp;
+    }
+
+    public int getClientPort() {
+        return clientPort;
+    }
 
     public static void main(String[] args) {
-        SockClient sockClient = new SockClient("localhost", 1111);
+        SockClient sockClient = new SockClient("localhost", 1111, "localhost", 1112, "1");
         sockClient.start();
     }
 }

@@ -11,9 +11,25 @@ import java.util.Date;
 public class KeepAlive implements Serializable {
 
     private static final long serialVersionUID = 1L;
+    private long lastTime;
+    private String clientIp;
+    private int clientPort;
+    private String id;
+
+    public KeepAlive(String clientIp, int clientPort, String id) {
+        this.clientIp = clientIp;
+        this.clientPort = clientPort;
+        this.id = id;
+        lastTime = System.currentTimeMillis();
+    }
 
     @Override
     public String toString() {
-        return new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date()) + "\t维持连接";
+        return "KeepAlive{" +
+                "lastTime=" + lastTime +
+                ", clientIp='" + clientIp + '\'' +
+                ", clientPort=" + clientPort +
+                ", id='" + id + '\'' +
+                '}';
     }
 }

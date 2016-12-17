@@ -10,9 +10,11 @@ import java.net.Socket;
 public class SockServerHandler implements Runnable{
 
     private Socket socket;
+    private SockServer sockServer;
 
-    public SockServerHandler(Socket socket) {
+    public SockServerHandler(Socket socket, SockServer sockServer) {
         this.socket = socket;
+        this.sockServer = sockServer;
     }
 
     public void run() {

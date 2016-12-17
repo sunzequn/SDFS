@@ -16,19 +16,20 @@ public class KeepAliveHandler implements Runnable {
     public void run() {
         long checkDelay = 1000;
         long keepAliveDelay = 2000;
-        try {
-            while (true){
+        while (true) {
+            try {
                 if (System.currentTimeMillis() - lastTime > keepAliveDelay) {
-                    client.sendInfo(new KeepAlive());
+                    client.sendInfo(new KeepAlive(client.getClientIp(), client.getClientPort(), client.getId()));
                     lastTime = System.currentTimeMillis();
                 } else {
                     Thread.sleep(checkDelay);
                 }
+            } catch (Exception e) {
+                e.printStackTrace();
+                // 主节点出现问题, 连接中断
+                client.stop();
+                //
             }
-        } catch (Exception e) {
-            e.printStackTrace();
-            client.stop();
-            return;
         }
     }
 }
