@@ -1,12 +1,13 @@
 package com.sunzequn.sdfs.socket.client;
 
+import com.sunzequn.sdfs.file.FileMeta;
 import com.sunzequn.sdfs.node.IDataNodeAction;
-import com.sunzequn.sdfs.socket.server.ServerAlive;
+import com.sunzequn.sdfs.socket.info.KeepAlive;
+import com.sunzequn.sdfs.socket.info.ServerAlive;
 
 import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
-import java.rmi.Remote;
 
 /**
  * Created by Sloriac on 2016/12/16.
@@ -68,6 +69,10 @@ public class SockClient {
         }
     }
 
+    public void sendFile(FileMeta fileMeta) {
+        sendInfo(fileMeta);
+    }
+
     public void sendInfo(Object obj) {
         try {
             if (socket.isClosed())
@@ -87,10 +92,15 @@ public class SockClient {
     }
 
     public <T> void receive(T t) {
-        System.out.println("收到信息: " + t);
+//        System.out.println("收到信息: " + t);
         if (t instanceof ServerAlive) {
             nodeAction.updateActiveNodes(((ServerAlive) t).getActiveNodes());
-            nodeAction.updateFiles(((ServerAlive) t).getFiles());
+            nodeAction.updateFromLeaderFiles(((ServerAlive) t).getFiles());
+        }
+        // leader发来新文件
+        else if (t instanceof FileMeta) {
+            System.out.println("节点" + id + " 收到文件" + ((FileMeta) t).getName());
+            nodeAction.writeRemoteFile((FileMeta) t);
         }
     }
 

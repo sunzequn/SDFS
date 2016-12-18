@@ -21,17 +21,20 @@ public class ReceiveHandler extends Thread {
     public void run() {
         while (true) {
             try {
+                if (socket.isClosed())
+                    return;
                 InputStream in = socket.getInputStream();
+
                 if (in.available() > 0) {
                     ObjectInputStream ois = new ObjectInputStream(in);
                     Object obj = ois.readObject();
                     client.receive(obj);
                 } else {
-                    Thread.sleep(100);
+                    Thread.sleep(500);
                 }
             } catch (Exception e) {
                 e.printStackTrace();
-                return;
+                stop();
             }
         }
     }

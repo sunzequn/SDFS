@@ -1,9 +1,11 @@
 package com.sunzequn.sdfs.socket.server;
 
+import com.sunzequn.sdfs.file.FileMeta;
 import com.sunzequn.sdfs.node.IDataNodeAction;
 import com.sunzequn.sdfs.node.NodeInfo;
-import com.sunzequn.sdfs.socket.client.KeepAlive;
-import com.sunzequn.sdfs.socket.client.SockClient;
+import com.sunzequn.sdfs.socket.info.Ask4File;
+import com.sunzequn.sdfs.socket.info.KeepAlive;
+import com.sunzequn.sdfs.socket.info.ServerAlive;
 
 import java.io.IOException;
 import java.io.ObjectOutputStream;
@@ -13,7 +15,6 @@ import java.util.*;
 
 /**
  * Created by Sloriac on 2016/12/16.
- *
  */
 public class SockServer {
 
@@ -30,14 +31,14 @@ public class SockServer {
         this.port = port;
     }
 
-    public void start(){
+    public void start() {
         try {
             serverSocket = new ServerSocket(port);
             for (NodeInfo nodeInfo : nodeAction.getActiveNodesInfo()) {
                 ids.add(nodeInfo.getId());
             }
-            while(true){
-                Socket socket  = serverSocket.accept();
+            while (true) {
+                Socket socket = serverSocket.accept();
                 new Thread(new SockServerHandler(socket, this)).start();
             }
         } catch (IOException e) {
@@ -58,12 +59,34 @@ public class SockServer {
 
     public void handleHeart(KeepAlive keepAlive, Socket socket) {
         String clientId = keepAlive.getSelfInfo().getId();
-        if (!ids.contains(clientId) && !clientId.equals(nodeAction.getLeaderNode().getId())) {
+        // ids保存左右节点
+        if (!ids.contains(clientId)) {
             ids.add(clientId);
             socketMap.put(clientId, socket);
-            nodeAction.getActiveNodesInfo().add(keepAlive.getSelfInfo());
+            // ActiveNodes保存除了leader之外的节点
+            if (!clientId.equals(nodeAction.getLeaderNode().getId()))
+                nodeAction.getActiveNodesInfo().add(keepAlive.getSelfInfo());
         }
-        nodeAction.updateFiles(keepAlive.getFiles());
         sendInfo(new ServerAlive(nodeAction.getActiveNodesInfo(), nodeAction.getFilesInfo()), socket);
+    }
+
+    public void handleNewFile(FileMeta fileMeta) {
+        // 转发给其他节点
+        System.out.println("leader 收到新文件：" + fileMeta.getName() + ", 转发给" + ids);
+        System.out.println(fileMeta);
+        for (String id : ids) {
+            if (!id.equals(fileMeta.getSrcNode())) {
+                sendInfo(fileMeta, socketMap.get(id));
+            }
+        }
+    }
+
+    public void downloadFile(Ask4File ask4File) {
+        for (FileMeta fileMeta : nodeAction.getFilesInfo()) {
+            if (fileMeta.getLocalName().equals(ask4File.getLocalName())) {
+                fileMeta = nodeAction.popuFile(fileMeta);
+                sendInfo(fileMeta, socketMap.get(ask4File.getId()));
+            }
+        }
     }
 }

@@ -1,4 +1,4 @@
-package com.sunzequn.sdfs.socket.server;
+package com.sunzequn.sdfs.socket.info;
 
 import com.sunzequn.sdfs.file.FileMeta;
 import com.sunzequn.sdfs.node.NodeInfo;
@@ -31,7 +31,6 @@ public class ServerAlive implements Serializable {
     public List<FileMeta> getFiles() {
         return files;
     }
-
 
     @Override
     public String toString() {

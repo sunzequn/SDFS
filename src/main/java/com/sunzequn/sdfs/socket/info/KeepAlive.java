@@ -1,4 +1,4 @@
-package com.sunzequn.sdfs.socket.client;
+package com.sunzequn.sdfs.socket.info;
 
 import com.sunzequn.sdfs.file.FileMeta;
 import com.sunzequn.sdfs.node.NodeInfo;

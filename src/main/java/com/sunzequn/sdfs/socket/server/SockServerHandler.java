@@ -1,6 +1,8 @@
 package com.sunzequn.sdfs.socket.server;
 
-import com.sunzequn.sdfs.socket.client.KeepAlive;
+import com.sunzequn.sdfs.file.FileMeta;
+import com.sunzequn.sdfs.socket.info.Ask4File;
+import com.sunzequn.sdfs.socket.info.KeepAlive;
 
 import java.io.InputStream;
 import java.io.ObjectInputStream;
@@ -29,17 +31,19 @@ public class SockServerHandler extends Thread {
                     Object obj = ois.readObject();
                     // 心跳测试
                     if (obj instanceof KeepAlive) {
-                        System.out.println("客户端心跳: " + obj.toString());
+//                        System.out.println("客户端心跳: " + obj.toString());
                         sockServer.handleHeart((KeepAlive) obj, socket);
                     }
                     // 新文件传输
-                    else if (obj instanceof String) {
-
+                    else if (obj instanceof FileMeta) {
+                        sockServer.handleNewFile((FileMeta) obj);
+                    } else if (obj instanceof Ask4File) {
+                        sockServer.downloadFile((Ask4File) obj);
                     }
                 }
             } catch (Exception e) {
                 e.printStackTrace();
-                stop();
+                return;
             }
         }
     }
