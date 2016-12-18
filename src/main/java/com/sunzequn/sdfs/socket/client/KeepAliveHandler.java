@@ -3,7 +3,7 @@ package com.sunzequn.sdfs.socket.client;
 /**
  * Created by Sloriac on 2016/12/16.
  */
-public class KeepAliveHandler implements Runnable {
+public class KeepAliveHandler extends Thread {
 
     private long lastTime;
     private SockClient client;
@@ -13,6 +13,7 @@ public class KeepAliveHandler implements Runnable {
         this.client = client;
     }
 
+    @Override
     public void run() {
         while (true) {
             try {
@@ -24,9 +25,7 @@ public class KeepAliveHandler implements Runnable {
                 }
             } catch (Exception e) {
                 e.printStackTrace();
-                // 主节点出现问题, 连接中断
-                client.stop();
-                //
+                return;
             }
         }
     }

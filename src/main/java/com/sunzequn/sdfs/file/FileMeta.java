@@ -1,12 +1,15 @@
 package com.sunzequn.sdfs.file;
 
 import java.io.File;
+import java.io.Serializable;
 
 /**
  * Created by Sloriac on 16/12/17.
  *
  */
-public class FileMeta {
+public class FileMeta implements Serializable {
+
+    private static final long serialVersionUID = 1L;
 
     private String name;
     private String timestamp;

@@ -2,7 +2,6 @@ package com.sunzequn.sdfs.test;
 
 import com.sunzequn.sdfs.node.DataNode;
 import com.sunzequn.sdfs.node.NodeInfo;
-import com.sunzequn.sdfs.socket.server.SockServer;
 
 
 /**

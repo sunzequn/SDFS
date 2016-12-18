@@ -1,10 +1,12 @@
 package com.sunzequn.sdfs.socket.client;
 
 import com.sunzequn.sdfs.node.IDataNodeAction;
+import com.sunzequn.sdfs.socket.server.ServerAlive;
 
 import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
+import java.rmi.Remote;
 
 /**
  * Created by Sloriac on 2016/12/16.
@@ -28,6 +30,9 @@ public class SockClient {
 
     private Socket socket;
 
+    private KeepAliveHandler keepAliveHandler;
+    private ReceiveHandler receiveHandler;
+
     public SockClient(IDataNodeAction nodeAction, String serverIp, int serverPort, String clientIp, int clientPort, String id) {
         this.nodeAction = nodeAction;
         this.serverIp = serverIp;
@@ -41,8 +46,10 @@ public class SockClient {
         try {
             socket = new Socket(serverIp, ServerPort);
             lastTime = System.currentTimeMillis();
-            new Thread(new KeepAliveHandler(lastTime, this)).start();
-            new Thread(new ReceiveHandler(socket, this)).start();
+            keepAliveHandler = new KeepAliveHandler(lastTime, this);
+            keepAliveHandler.start();
+            receiveHandler = new ReceiveHandler(socket, this);
+            receiveHandler.start();
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -52,6 +59,7 @@ public class SockClient {
      * 主节点故障
      */
     public void stop() {
+        System.out.println("--连接中断--");
         try {
             socket.close();
             nodeAction.updateLeader();
@@ -62,12 +70,13 @@ public class SockClient {
 
     public void sendInfo(Object obj) {
         try {
+            if (socket.isClosed())
+                return;
             ObjectOutputStream oos = new ObjectOutputStream(socket.getOutputStream());
             oos.writeObject(obj);
             oos.flush();
         } catch (IOException e) {
             e.printStackTrace();
-            System.out.println("连接中断");
             stop();
         }
     }
@@ -79,6 +88,10 @@ public class SockClient {
 
     public <T> void receive(T t) {
         System.out.println("收到信息: " + t);
+        if (t instanceof ServerAlive) {
+            nodeAction.updateActiveNodes(((ServerAlive) t).getActiveNodes());
+            nodeAction.updateFiles(((ServerAlive) t).getFiles());
+        }
     }
 
     public String getId() {

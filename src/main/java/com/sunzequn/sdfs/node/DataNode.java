@@ -5,9 +5,7 @@ import com.sunzequn.sdfs.socket.client.SockClient;
 import com.sunzequn.sdfs.socket.server.ServerThread;
 import com.sunzequn.sdfs.socket.server.SockServer;
 
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 
 /**
  * Created by Sloriac on 2016/12/18.
@@ -49,6 +47,7 @@ public class DataNode implements IDataNodeAction {
         }
         sockClient = new SockClient(this, leaderInfo.getIp(), leaderInfo.getPort(), selfInfo.getIp(), selfInfo.getPort(), selfInfo.getId());
         sockClient.start();
+
     }
 
     @Override
@@ -60,6 +59,12 @@ public class DataNode implements IDataNodeAction {
     public LinkedList<NodeInfo> getActiveNodesInfo() {
         return this.activeNodes;
     }
+
+    @Override
+    public NodeInfo getLeaderNode() {
+        return leaderInfo;
+    }
+
 
     @Override
     public void updateFiles(List<FileMeta> files) {
@@ -75,6 +80,16 @@ public class DataNode implements IDataNodeAction {
     @Override
     public void updateLeader() {
         leaderInfo = activeNodes.pop();
+        long sleepTime = 1000;
+        if (leaderInfo.getId().equals(selfInfo.getId())) {
+            isLeader = true;
+            sleepTime = 10;
+        }
+        try {
+            Thread.sleep(sleepTime);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
         start();
         System.out.println("启动新的leader节点：" + leaderInfo);
     }
@@ -83,4 +98,5 @@ public class DataNode implements IDataNodeAction {
     public NodeInfo getSelfNode() {
         return this.selfInfo;
     }
+
 }

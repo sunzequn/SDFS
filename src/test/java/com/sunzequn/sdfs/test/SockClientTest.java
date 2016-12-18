@@ -9,7 +9,7 @@ import com.sunzequn.sdfs.node.NodeInfo;
 public class SockClientTest {
 
     public static void main(String[] args) {
-        NodeInfo selfInfo = new NodeInfo("2", "localhost", 1122);
+        NodeInfo selfInfo = new NodeInfo("2", "localhost", 1002);
         NodeInfo leader = new NodeInfo("leader", "localhost", 1111);
         DataNode dataNode = new DataNode(selfInfo, leader);
         dataNode.start();

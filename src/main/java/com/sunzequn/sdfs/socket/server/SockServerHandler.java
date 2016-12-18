@@ -9,7 +9,7 @@ import java.net.Socket;
 /**
  * Created by Sloriac on 2016/12/16.
  */
-public class SockServerHandler implements Runnable{
+public class SockServerHandler extends Thread {
 
     private Socket socket;
     private SockServer sockServer;
@@ -19,6 +19,7 @@ public class SockServerHandler implements Runnable{
         this.sockServer = sockServer;
     }
 
+    @Override
     public void run() {
         while (true) {
             try {
@@ -38,7 +39,7 @@ public class SockServerHandler implements Runnable{
                 }
             } catch (Exception e) {
                 e.printStackTrace();
-                return;
+                stop();
             }
         }
     }

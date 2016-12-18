@@ -7,7 +7,7 @@ import java.net.Socket;
 /**
  * Created by Sloriac on 2016/12/16.
  */
-public class ReceiveHandler implements Runnable {
+public class ReceiveHandler extends Thread {
 
     private Socket socket;
     private SockClient client;
@@ -17,6 +17,7 @@ public class ReceiveHandler implements Runnable {
         this.client = client;
     }
 
+    @Override
     public void run() {
         while (true) {
             try {
@@ -26,11 +27,10 @@ public class ReceiveHandler implements Runnable {
                     Object obj = ois.readObject();
                     client.receive(obj);
                 } else {
-                    Thread.sleep(10);
+                    Thread.sleep(100);
                 }
             } catch (Exception e) {
                 e.printStackTrace();
-                client.stop();
                 return;
             }
         }
