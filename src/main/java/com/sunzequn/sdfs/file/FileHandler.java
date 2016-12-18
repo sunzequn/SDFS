@@ -12,6 +12,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -35,13 +36,14 @@ public class FileHandler {
     public FileMeta writeLocalFile(String srcPath) {
         try {
             File srcFile = new File(srcPath);
-            InputStream inputStream = new FileInputStream(srcFile);
+            byte[] contents = FileUtils.readFileToByteArray(srcFile);
             long size = srcFile.length();
             String name = srcFile.getName();
             String timestamp = TimeUtil.generateTime();
             String localName = generateLocalName(name, timestamp);
-            byte[] content = FileUtil.copyFile(inputStream, folder + localName);
-            return new FileMeta(name, localName, timestamp, size, nodeId, content);
+            String path = folder + localName;
+            FileUtils.copyFile(srcFile, new File(path));
+            return new FileMeta(name, localName, timestamp, size, nodeId, contents);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -51,8 +53,7 @@ public class FileHandler {
     public FileMeta popuFile(FileMeta fileMeta) {
         try {
             String path = folder + fileMeta.getLocalName();
-            File file = new File(path);
-            fileMeta.setContents(FileUtil.input2byte(new FileInputStream(file)));
+            fileMeta.setContents(FileUtils.readFileToByteArray(new File(path)));
             return fileMeta;
         } catch (Exception e) {
             e.printStackTrace();

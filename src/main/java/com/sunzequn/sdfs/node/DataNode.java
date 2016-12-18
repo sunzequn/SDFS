@@ -68,7 +68,7 @@ public class DataNode implements IDataNodeAction {
         //同步到leader
         sockClient.sendFile(fileMeta);
         //列表更新
-        System.out.println(fileMeta);
+        fileMeta.setContents(null);
         files.add(fileMeta);
     }
 

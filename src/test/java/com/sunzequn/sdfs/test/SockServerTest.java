@@ -11,7 +11,7 @@ public class SockServerTest {
 
     public static void main(String[] args) {
         NodeInfo leader = new NodeInfo("0", "localhost", 1111);
-        DataNode dataNode = new DataNode(leader, true, "C:\\Users\\Sloriac\\Desktop\\code\\SDFS\\src\\main\\resources\\0\\");
+        DataNode dataNode = new DataNode(leader, true, "/Users/Sloriac/Programing/github/SDFS/0/");
         dataNode.start();
     }
 }
