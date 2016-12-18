@@ -1,15 +1,21 @@
 package com.sunzequn.sdfs.socket.client;
 
+import com.sunzequn.sdfs.node.IDataNodeAction;
+
 import java.io.IOException;
 import java.io.ObjectOutputStream;
-import java.net.InetAddress;
 import java.net.Socket;
-import java.net.UnknownHostException;
 
 /**
  * Created by Sloriac on 2016/12/16.
+ *
  */
 public class SockClient {
+
+    private static final int DELAY = 500;
+
+    // 用于回调
+    private IDataNodeAction nodeAction;
 
     private String serverIp;
     private int ServerPort;
@@ -18,10 +24,12 @@ public class SockClient {
     private int clientPort;
 
     private String id;
-    private Socket socket;
     private long lastTime;
 
-    public SockClient(String serverIp, int serverPort, String clientIp, int clientPort, String id) {
+    private Socket socket;
+
+    public SockClient(IDataNodeAction nodeAction, String serverIp, int serverPort, String clientIp, int clientPort, String id) {
+        this.nodeAction = nodeAction;
         this.serverIp = serverIp;
         ServerPort = serverPort;
         this.clientIp = clientIp;
@@ -40,9 +48,13 @@ public class SockClient {
         }
     }
 
+    /**
+     * 主节点故障
+     */
     public void stop() {
         try {
             socket.close();
+            nodeAction.updateLeader();
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -56,7 +68,13 @@ public class SockClient {
         } catch (IOException e) {
             e.printStackTrace();
             System.out.println("连接中断");
+            stop();
         }
+    }
+
+    public void sendAliveInfo() {
+        KeepAlive keepAlive = new KeepAlive(nodeAction.getSelfNode(), nodeAction.getFilesInfo());
+        sendInfo(keepAlive);
     }
 
     public <T> void receive(T t) {
@@ -83,8 +101,7 @@ public class SockClient {
         return clientPort;
     }
 
-    public static void main(String[] args) {
-        SockClient sockClient = new SockClient("localhost", 1111, "localhost", 1112, "1");
-        sockClient.start();
+    public static int getDELAY() {
+        return DELAY;
     }
 }

@@ -13,7 +13,8 @@ public class FileMeta {
     private long size;
     private String srcPath;
     private String descPath;
-    private File file;
+    //只有在初次传输的时候才会将文件File传输，其他时候都是null
+    private File file = null;
 
     public FileMeta(String srcPath, String descPath, String timestamp) {
         this.srcPath = srcPath;

@@ -1,22 +1,28 @@
 package com.sunzequn.sdfs.socket.server;
 
+import com.sunzequn.sdfs.node.IDataNodeAction;
+import com.sunzequn.sdfs.node.NodeInfo;
+import com.sunzequn.sdfs.socket.client.KeepAlive;
+
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Created by Sloriac on 2016/12/16.
  *
  */
 public class SockServer {
-
+    // 用于回调
+    private IDataNodeAction nodeAction;
     private int port;
     private Set<String> clientIds = new HashSet<String>();
+    private Map<String, Socket> socketMap = new HashMap<>();
     protected ServerSocket serverSocket;
 
-    public SockServer(int port) {
+    public SockServer(IDataNodeAction nodeAction, int port) {
+        this.nodeAction = nodeAction;
         this.port = port;
     }
 
@@ -32,8 +38,13 @@ public class SockServer {
         }
     }
 
-    public static void main(String[] args) {
-        SockServer sockServer = new SockServer(1111);
-        sockServer.start();
+    public void handleHeart(KeepAlive keepAlive, Socket socket) {
+        String clientId = keepAlive.getSelfInfo().getId();
+        if (!clientIds.contains(clientId)) {
+            clientIds.add(clientId);
+            socketMap.put(clientId, socket);
+            nodeAction.getActiveNodesInfo().add(keepAlive.getSelfInfo());
+        }
+        nodeAction.updateFiles(keepAlive.getFiles());
     }
 }

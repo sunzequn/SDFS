@@ -14,15 +14,13 @@ public class KeepAliveHandler implements Runnable {
     }
 
     public void run() {
-        long checkDelay = 1000;
-        long keepAliveDelay = 2000;
         while (true) {
             try {
-                if (System.currentTimeMillis() - lastTime > keepAliveDelay) {
-                    client.sendInfo(new KeepAlive(client.getClientIp(), client.getClientPort(), client.getId()));
+                if (System.currentTimeMillis() - lastTime > SockClient.getDELAY()) {
+                    client.sendAliveInfo();
                     lastTime = System.currentTimeMillis();
                 } else {
-                    Thread.sleep(checkDelay);
+                    Thread.sleep(SockClient.getDELAY());
                 }
             } catch (Exception e) {
                 e.printStackTrace();

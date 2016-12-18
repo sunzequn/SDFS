@@ -1,8 +1,10 @@
 package com.sunzequn.sdfs.socket.client;
 
+import com.sunzequn.sdfs.file.FileMeta;
+import com.sunzequn.sdfs.node.NodeInfo;
+
 import java.io.Serializable;
-import java.text.SimpleDateFormat;
-import java.util.Date;
+import java.util.List;
 
 /**
  * Created by Sloriac on 2016/12/16.
@@ -12,24 +14,33 @@ public class KeepAlive implements Serializable {
 
     private static final long serialVersionUID = 1L;
     private long lastTime;
-    private String clientIp;
-    private int clientPort;
-    private String id;
 
-    public KeepAlive(String clientIp, int clientPort, String id) {
-        this.clientIp = clientIp;
-        this.clientPort = clientPort;
-        this.id = id;
-        lastTime = System.currentTimeMillis();
+    // 自己节点的相关信息
+    private NodeInfo selfInfo;
+    // 自己节点目前的文件
+    private List<FileMeta> files;
+
+
+    public KeepAlive(NodeInfo selfInfo, List<FileMeta> files) {
+        this.lastTime = System.currentTimeMillis();
+        this.selfInfo = selfInfo;
+        this.files = files;
+    }
+
+    public List<FileMeta> getFiles() {
+        return files;
+    }
+
+    public NodeInfo getSelfInfo() {
+        return selfInfo;
     }
 
     @Override
     public String toString() {
         return "KeepAlive{" +
                 "lastTime=" + lastTime +
-                ", clientIp='" + clientIp + '\'' +
-                ", clientPort=" + clientPort +
-                ", id='" + id + '\'' +
+                ", selfInfo=" + selfInfo +
+                ", files=" + files +
                 '}';
     }
 }

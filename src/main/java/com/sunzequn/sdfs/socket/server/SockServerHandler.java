@@ -1,5 +1,7 @@
 package com.sunzequn.sdfs.socket.server;
 
+import com.sunzequn.sdfs.socket.client.KeepAlive;
+
 import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.net.Socket;
@@ -19,13 +21,20 @@ public class SockServerHandler implements Runnable{
 
     public void run() {
         while (true) {
-            InputStream in = null;
             try {
-                in = socket.getInputStream();
+                InputStream in = socket.getInputStream();
                 if (in.available() > 0) {
                     ObjectInputStream ois = new ObjectInputStream(in);
                     Object obj = ois.readObject();
-                    System.out.println(obj.toString());
+                    // 心跳测试
+                    if (obj instanceof KeepAlive) {
+                        System.out.println("客户端心跳: " + obj.toString());
+                        sockServer.handleHeart((KeepAlive) obj, socket);
+                    }
+                    // 新文件传输
+                    else if (obj instanceof String) {
+
+                    }
                 }
             } catch (Exception e) {
                 e.printStackTrace();
