@@ -22,5 +22,5 @@ public interface IRemote extends Remote {
 
     public void exit() throws RemoteException;
 
-    public void uploadFile(File file) throws RemoteException;
+    public void uploadFile(File file, byte[] contents) throws RemoteException;
 }

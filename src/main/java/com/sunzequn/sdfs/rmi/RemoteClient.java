@@ -2,6 +2,7 @@ package com.sunzequn.sdfs.rmi;
 
 import com.sunzequn.sdfs.file.FileMeta;
 
+import java.io.File;
 import java.net.MalformedURLException;
 import java.rmi.Naming;
 import java.rmi.NotBoundException;
@@ -19,14 +20,9 @@ public class RemoteClient {
         this.name = "rmi://" + ipPort + "/rmi";
     }
 
-    public String getTime() {
-        try {
-            IRemote remote = (IRemote) Naming.lookup(name);
-            return remote.generateTime();
-        } catch (NotBoundException | MalformedURLException | RemoteException e) {
-            e.printStackTrace();
-        }
-        return null;
+    public String getTime() throws RemoteException, NotBoundException, MalformedURLException {
+        IRemote remote = (IRemote) Naming.lookup(name);
+        return remote.generateTime();
     }
 
     public String getIp() {
@@ -66,5 +62,14 @@ public class RemoteClient {
             e.printStackTrace();
         }
         return null;
+    }
+
+    public void uploadFile(File file, byte[] contents) {
+        try {
+            IRemote remote = (IRemote) Naming.lookup(name);
+            remote.uploadFile(file, contents);
+        } catch (NotBoundException | MalformedURLException | RemoteException e) {
+            e.printStackTrace();
+        }
     }
 }

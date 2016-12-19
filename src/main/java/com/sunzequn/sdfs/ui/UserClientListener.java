@@ -22,17 +22,14 @@ public class UserClientListener implements ActionListener {
     private JScrollPane upperPanel;
     private JTextField portTextField;
     private JButton connectButton;
-    private JButton exitButton;
     private JLabel infoLabel;
-    private String dataNodeUrl;
     ClientTimeThread clientTimeThread;
 
-    public UserClientListener(JScrollPane upperPanel, JTextField portTextField, JButton connectButton, JButton exitButton, JLabel infoLabel) {
+    public UserClientListener(JScrollPane upperPanel, JTextField portTextField, JButton connectButton, JLabel infoLabel) {
         this.upperPanel = upperPanel;
         this.portTextField = portTextField;
         this.connectButton = connectButton;
         this.infoLabel = infoLabel;
-        this.exitButton = exitButton;
     }
 
     @Override
@@ -63,9 +60,9 @@ public class UserClientListener implements ActionListener {
             //链接leader请求分配数据节点
             RemoteClient remoteClient = new RemoteClient(port);
             //获得数据节点
-            dataNodeUrl = remoteClient.getNode();
-            System.out.println(dataNodeUrl);
-            remoteClient = new RemoteClient(dataNodeUrl);
+            DataNodeUrl.dataNodeUrl = remoteClient.getNode();
+            System.out.println(DataNodeUrl.dataNodeUrl);
+            remoteClient = new RemoteClient(DataNodeUrl.dataNodeUrl);
             //获取ip注册一下
             String ip = remoteClient.getIp();
             display(remoteClient, ip);
@@ -73,6 +70,7 @@ public class UserClientListener implements ActionListener {
             if (files != null && files.size() > 0) {
                 showFiles(files);
             }
+            connectButton.setText("离开");
         } else {
             infoLabel.setText("参数错误，请重试！");
         }
@@ -84,9 +82,10 @@ public class UserClientListener implements ActionListener {
     }
 
     private void handleExitButton() {
-        if (dataNodeUrl == null) return;
-        RemoteClient remoteClient = new RemoteClient(dataNodeUrl);
+        if (DataNodeUrl.dataNodeUrl == null) return;
+        RemoteClient remoteClient = new RemoteClient(DataNodeUrl.dataNodeUrl);
         remoteClient.exit();
+        connectButton.setText("连接");
     }
 
     private void showFiles(List<FileMeta> files) {
@@ -101,7 +100,7 @@ public class UserClientListener implements ActionListener {
             jLabel.setText(FileUtil.getFixedLenString(file.getName() + "  " + file.getTimestamp(), 50, ' '));
             JButton fileButton = new JButton();
             fileButton.setText("下 载");
-            fileButton.addActionListener(new DownloadListener(upperPanel, file, dataNodeUrl));
+            fileButton.addActionListener(new DownloadListener(upperPanel, file));
             panel.add(jLabel);
             panel.add(fileButton);
             jPanel.add(panel);

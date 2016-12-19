@@ -71,7 +71,8 @@ public class SockServer {
 
         }
         nodeAction.updateNodeUser(keepAlive.getNodeUser());
-        sendInfo(new ServerAlive(nodeAction.getActiveNodesInfo(), nodeAction.getFilesInfo(), nodeAction.getNodeUsers(), nodeAction.getActiveNodesLastTime()), socket);
+        sendInfo(new ServerAlive(nodeAction.getActiveNodesInfo(), nodeAction.getFilesInfo(),
+                nodeAction.getNodeUsers(), nodeAction.getActiveNodesLastTime(), nodeAction.getTotalUserNum()), socket);
     }
 
 
@@ -88,7 +89,7 @@ public class SockServer {
 
     public void downloadFile(Ask4File ask4File) {
         for (FileMeta fileMeta : nodeAction.getFilesInfo()) {
-            if (fileMeta.getLocalName().equals(ask4File.getLocalName())) {
+            if (fileMeta.getName().equals(ask4File.getLocalName())) {
                 fileMeta = nodeAction.popuFile(fileMeta);
                 sendInfo(fileMeta, socketMap.get(ask4File.getId()));
             }

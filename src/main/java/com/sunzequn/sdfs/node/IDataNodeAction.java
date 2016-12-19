@@ -34,6 +34,8 @@ public interface IDataNodeAction {
 
     public void writeLocalFile(File file);
 
+    public void uploadFile(File file, byte[] contents);
+
     public void updateActiveNodes(LinkedList<NodeInfo> activeNodes);
 
     public NodeInfo getFreeNode();
@@ -63,5 +65,10 @@ public interface IDataNodeAction {
     public void stop();
 
     public void restart();
+
+    public Integer getTotalUserNum();
+
+    public void updateTotlaUserNun(Integer num);
+
 
 }

@@ -17,12 +17,14 @@ public class ServerAlive implements Serializable {
     private HashMap<String, Long> activeNodesLastTime;
     private List<FileMeta> files;
     private List<NodeUser> nodeUsers;
+    private Integer totalUserNum;
 
-    public ServerAlive(LinkedList<NodeInfo> activeNodes, List<FileMeta> files, List<NodeUser> nodeUsers, HashMap<String, Long> activeNodesLastTime) {
+    public ServerAlive(LinkedList<NodeInfo> activeNodes, List<FileMeta> files, List<NodeUser> nodeUsers, HashMap<String, Long> activeNodesLastTime, Integer totalUserNum) {
         this.activeNodes = activeNodes;
         this.files = files;
         this.nodeUsers = nodeUsers;
         this.activeNodesLastTime = activeNodesLastTime;
+        this.totalUserNum = totalUserNum;
     }
 
     public LinkedList<NodeInfo> getActiveNodes() {
@@ -41,6 +43,10 @@ public class ServerAlive implements Serializable {
         return activeNodesLastTime;
     }
 
+    public Integer getTotalUserNum() {
+        return totalUserNum;
+    }
+
     @Override
     public String toString() {
         return "ServerAlive{" +
@@ -48,6 +54,7 @@ public class ServerAlive implements Serializable {
                 ", activeNodesLastTime=" + activeNodesLastTime +
                 ", files=" + files +
                 ", nodeUsers=" + nodeUsers +
+                ", totalUserNum=" + totalUserNum +
                 '}';
     }
 }

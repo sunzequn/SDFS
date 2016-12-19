@@ -17,6 +17,7 @@ public class UserClient extends JFrame {
     private JTextField portTextField;
     private JButton connectButton;
     private JButton exitButton;
+    private JButton uploadButton;
     private JLabel infoLabel;
 
     public UserClient(String name) throws HeadlessException {
@@ -57,13 +58,15 @@ public class UserClient extends JFrame {
         connectButton = new JButton("连接");
         infoLabel = new JLabel("", JLabel.CENTER);
 
-        exitButton = new JButton("离开");
-        UserClientListener listener = new UserClientListener(upperPanel, portTextField, connectButton, exitButton, infoLabel);
+        UserClientListener listener = new UserClientListener(upperPanel, portTextField, connectButton, infoLabel);
         connectButton.addActionListener(listener);
-        exitButton.addActionListener(listener);
+
+
+        uploadButton = new JButton("上传");
+        uploadButton.addActionListener(new UploadListener(midPanel));
 
         midPanel.add(connectButton);
-        midPanel.add(exitButton);
+        midPanel.add(uploadButton);
         this.add(midPanel);
     }
 

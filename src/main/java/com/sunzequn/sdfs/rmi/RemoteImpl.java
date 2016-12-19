@@ -41,6 +41,7 @@ public class RemoteImpl extends UnicastRemoteObject implements IRemote {
     @Override
     public String getIp() throws RemoteException {
         try {
+            //节点用户数目自增
             nodeAction.addUser();
             return InetAddress.getLocalHost().getHostAddress();
         } catch (UnknownHostException e) {
@@ -66,8 +67,8 @@ public class RemoteImpl extends UnicastRemoteObject implements IRemote {
     }
 
     @Override
-    public void uploadFile(File file) throws RemoteException {
-        nodeAction.writeLocalFile(file);
+    public void uploadFile(File file, byte[] contents) throws RemoteException {
+        nodeAction.uploadFile(file, contents);
     }
 
 

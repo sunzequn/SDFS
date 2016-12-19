@@ -16,7 +16,6 @@ public class FileMeta implements Serializable {
     private static final long serialVersionUID = 1L;
 
     private String name;
-    private String localName;
     private String timestamp;
     private long size;
     private String srcNode;
@@ -24,10 +23,9 @@ public class FileMeta implements Serializable {
     // meta时候为null
     private byte[] contents;
 
-    public FileMeta(String name, String localName, String timestamp, long size, String srcNode, byte[] contents) {
+    public FileMeta(String name, String timestamp, long size, String srcNode, byte[] contents) {
         try {
             this.name = name;
-            this.localName = localName;
             this.timestamp = timestamp;
             this.size = size;
             this.srcNode = srcNode;
@@ -40,10 +38,6 @@ public class FileMeta implements Serializable {
 
     public String getName() {
         return name;
-    }
-
-    public String getLocalName() {
-        return localName;
     }
 
     public String getTimestamp() {
@@ -74,7 +68,6 @@ public class FileMeta implements Serializable {
     public String toString() {
         return "FileMeta{" +
                 "name='" + name + '\'' +
-                ", localName='" + localName + '\'' +
                 ", timestamp='" + timestamp + '\'' +
                 ", size=" + size +
                 ", srcNode='" + srcNode + '\'' +

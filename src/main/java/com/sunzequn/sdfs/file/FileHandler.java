@@ -38,10 +38,22 @@ public class FileHandler {
             long size = srcFile.length();
             String name = srcFile.getName();
             String timestamp = TimeUtil.generateTime();
-            String localName = generateLocalName(name, timestamp);
-            String path = folder + localName;
+            String path = folder + name;
             FileUtils.copyFile(srcFile, new File(path));
-            return new FileMeta(name, localName, timestamp, size, nodeId, contents);
+            return new FileMeta(name, timestamp, size, nodeId, contents);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    public FileMeta writeLocalFile(File file, String timestamp, byte[] contents) {
+        try {
+            long size = file.length();
+            String name = file.getName();
+            String path = folder + name;
+            FileUtils.writeByteArrayToFile(new File(path), contents);
+            return new FileMeta(name, timestamp, size, nodeId, contents);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -50,7 +62,7 @@ public class FileHandler {
 
     public FileMeta popuFile(FileMeta fileMeta) {
         try {
-            String path = folder + fileMeta.getLocalName();
+            String path = folder + fileMeta.getName();
             fileMeta.setContents(FileUtils.readFileToByteArray(new File(path)));
             return fileMeta;
         } catch (Exception e) {
@@ -61,7 +73,7 @@ public class FileHandler {
 
     public void writeRemoteFile(FileMeta fileMeta) {
         try {
-            FileUtil.copyFile(fileMeta.getContents(), folder + fileMeta.getLocalName());
+            FileUtil.copyFile(fileMeta.getContents(), folder + fileMeta.getName());
         } catch (Exception e) {
             e.printStackTrace();
         }

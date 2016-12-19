@@ -2,17 +2,18 @@ package com.sunzequn.sdfs.node;
 
 import com.sunzequn.sdfs.file.FileHandler;
 import com.sunzequn.sdfs.file.FileMeta;
+import com.sunzequn.sdfs.rmi.IRemote;
+import com.sunzequn.sdfs.rmi.RemoteClient;
 import com.sunzequn.sdfs.rmi.RemoteServer;
 import com.sunzequn.sdfs.socket.client.SockClient;
 import com.sunzequn.sdfs.socket.info.Ask4File;
 import com.sunzequn.sdfs.socket.info.NodeUser;
-import com.sunzequn.sdfs.socket.server.ServerThread;
 import com.sunzequn.sdfs.socket.server.SockServer;
+import com.sunzequn.sdfs.utils.FileUtil;
+import org.apache.commons.io.FileUtils;
 
 import java.io.File;
-import java.net.MalformedURLException;
-import java.rmi.NotBoundException;
-import java.rmi.RemoteException;
+import java.io.IOException;
 import java.util.*;
 
 /**
@@ -39,11 +40,15 @@ public class DataNode implements IDataNodeAction {
     private SockClient sockClient;
     private SockServer sockServer;
     private List<FileMeta> files = new ArrayList<>();
-    private Set<String> fileLocalNamesSyncLock = new HashSet<>();
+    //同步服务器文件的锁,防止重复同步
+    private Set<String> fileSyncLock = new HashSet<>();
     private RemoteServer remoteServer;
+    private RemoteClient remoteClient;
 
     private String saveFolder;
     private FileHandler fileHandler;
+
+    private Integer totolUserNum = 0;
 
     public DataNode(NodeInfo selfInfo, NodeInfo leaderInfo, String saveFolder) {
         this.selfInfo = selfInfo;
@@ -74,6 +79,7 @@ public class DataNode implements IDataNodeAction {
         if (isFirst) {
             // RMI端口是socket端口+1
             remoteServer = new RemoteServer(this, selfInfo.getPort() + 1);
+            remoteClient = new RemoteClient(leaderInfo.getIp() + (leaderInfo.getPort() + 1));
             myUser.setNodeId(selfInfo.getId());
         }
 
@@ -92,6 +98,20 @@ public class DataNode implements IDataNodeAction {
     }
 
     @Override
+    public void uploadFile(File file, byte[] contents) {
+        try {
+            FileMeta fileMeta = fileHandler.writeLocalFile(file, remoteClient.getTime(), contents);
+            //同步到leader
+            sockClient.sendFile(fileMeta);
+            //列表更新
+            fileMeta.setContents(null);
+            files.add(fileMeta);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Override
     public void updateActiveNodes(LinkedList<NodeInfo> activeNodes) {
         if (isLeader)
             return;
@@ -100,7 +120,8 @@ public class DataNode implements IDataNodeAction {
 
     @Override
     public NodeInfo getFreeNode() {
-
+        //系统用户数自增
+        totolUserNum += 1;
         for (NodeUser nodeUser : nodeUsers) {
             if (nodeUser.getNum() < 5) {
                 return getNodeById(nodeUser.getNodeId());
@@ -140,6 +161,7 @@ public class DataNode implements IDataNodeAction {
 
     @Override
     public void addUser() {
+        //节点用户数+1
         myUser.setNum(myUser.getNum() + 1);
     }
 
@@ -181,11 +203,22 @@ public class DataNode implements IDataNodeAction {
     }
 
     @Override
+    public Integer getTotalUserNum() {
+        return totolUserNum;
+    }
+
+    @Override
+    public void updateTotlaUserNun(Integer num) {
+        if (isLeader) return;
+        this.totolUserNum = num;
+    }
+
+    @Override
     public void writeRemoteFile(FileMeta fileMeta) {
         System.out.println("写入远端文件");
         fileHandler.writeRemoteFile(fileMeta);
-        if (fileLocalNamesSyncLock.contains(fileMeta.getLocalName())) {
-            fileLocalNamesSyncLock.remove(fileMeta.getLocalName());
+        if (fileSyncLock.contains(fileMeta.getName())) {
+            fileSyncLock.remove(fileMeta.getName());
         }
         fileMeta.setContents(null);
         files.add(fileMeta);
@@ -232,14 +265,14 @@ public class DataNode implements IDataNodeAction {
 //        System.out.println("本地" + files);
 //        System.out.println("leader" + leaderFiles);
         //检查锁，还有在同步的文件
-        if (fileLocalNamesSyncLock.size() > 0)
+        if (fileSyncLock.size() > 0)
             return;
         if (this.files.size() != leaderFiles.size()) {
             getNewFiles(this.files, leaderFiles);
-            if (fileLocalNamesSyncLock.size() > 0) {
+            if (fileSyncLock.size() > 0) {
                 System.out.println("////////////");
-                System.out.println(fileLocalNamesSyncLock);
-                for (String localName : fileLocalNamesSyncLock) {
+                System.out.println(fileSyncLock);
+                for (String localName : fileSyncLock) {
                     //请求填充file信息
                     Ask4File ask4File = new Ask4File(selfInfo.getId(), localName);
                     sockClient.sendInfo(ask4File);
@@ -277,11 +310,11 @@ public class DataNode implements IDataNodeAction {
     private void getNewFiles(List<FileMeta> oldFiles, List<FileMeta> newFiles) {
         Set<String> fileNames = new HashSet<>();
         for (FileMeta oldFile : oldFiles) {
-            fileNames.add(oldFile.getLocalName());
+            fileNames.add(oldFile.getName());
         }
         for (FileMeta newFile : newFiles) {
-            if (!fileNames.contains(newFile.getLocalName())) {
-                fileLocalNamesSyncLock.add(newFile.getLocalName());
+            if (!fileNames.contains(newFile.getName())) {
+                fileSyncLock.add(newFile.getName());
             }
         }
     }
@@ -295,6 +328,5 @@ public class DataNode implements IDataNodeAction {
         }
         return null;
     }
-
 
 }

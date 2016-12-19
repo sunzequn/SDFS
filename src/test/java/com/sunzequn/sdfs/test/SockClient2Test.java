@@ -15,6 +15,5 @@ public class SockClient2Test {
         NodeInfo leader = new NodeInfo("0", "localhost", 1111);
         DataNode dataNode = new DataNode(selfInfo, leader, "/home/sloriac/data/2/");
         dataNode.start(true);
-        dataNode.writeLocalFile(new File("/home/sloriac/data/test"));
     }
 }

@@ -14,23 +14,20 @@ public class DownloadListener implements ActionListener {
 
     private JScrollPane upperPanel;
     private FileMeta fileMeta;
-    private String remoteHost;
 
-    public DownloadListener(JScrollPane upperPanel, FileMeta fileMeta, String remoteHost) {
+    public DownloadListener(JScrollPane upperPanel, FileMeta fileMeta) {
         this.upperPanel = upperPanel;
         this.fileMeta = fileMeta;
-        this.remoteHost = remoteHost;
     }
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        JFileChooser dlg = new JFileChooser();
-        dlg.setSelectedFile(new File(fileMeta.getName()));
-        dlg.setDialogTitle("保存");
-        int result = dlg.showDialog(upperPanel, "保存文件");  // 打开"打开文件"对话框
-// int result = dlg.showSaveDialog(this);  // 打"开保存文件"对话框
+        JFileChooser jFileChooser = new JFileChooser();
+        jFileChooser.setSelectedFile(new File(fileMeta.getName()));
+        jFileChooser.setDialogTitle("保存");
+        int result = jFileChooser.showDialog(upperPanel, "保存文件");
         if (result == JFileChooser.APPROVE_OPTION) {
-            File file = dlg.getSelectedFile();
+            File file = jFileChooser.getSelectedFile();
             System.out.println(file.getPath());
         }
     }
