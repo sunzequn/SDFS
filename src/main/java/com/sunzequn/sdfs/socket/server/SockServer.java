@@ -58,6 +58,8 @@ public class SockServer {
 
     public void handleHeart(KeepAlive keepAlive, Socket socket) {
         System.out.println("客户端心跳: " + keepAlive);
+        // 每一次心跳更新一次
+        nodeAction.updateActiveNodesLastTime(keepAlive.getSelfInfo().getId(), System.currentTimeMillis());
         String clientId = keepAlive.getSelfInfo().getId();
         // ids保存左右节点
         if (!ids.contains(clientId)) {
@@ -65,10 +67,11 @@ public class SockServer {
             socketMap.put(clientId, socket);
             // ActiveNodes保存除了leader之外的节点
             if (!clientId.equals(nodeAction.getLeaderNode().getId()))
-                nodeAction.getActiveNodesInfo().add(keepAlive.getSelfInfo());
+                nodeAction.updateActiveNode(keepAlive.getSelfInfo());
+
         }
         nodeAction.updateNodeUser(keepAlive.getNodeUser());
-        sendInfo(new ServerAlive(nodeAction.getActiveNodesInfo(), nodeAction.getFilesInfo(), nodeAction.getNodeUsers()), socket);
+        sendInfo(new ServerAlive(nodeAction.getActiveNodesInfo(), nodeAction.getFilesInfo(), nodeAction.getNodeUsers(), nodeAction.getActiveNodesLastTime()), socket);
     }
 
 

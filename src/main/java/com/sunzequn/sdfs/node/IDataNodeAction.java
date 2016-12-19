@@ -3,6 +3,8 @@ package com.sunzequn.sdfs.node;
 import com.sunzequn.sdfs.file.FileMeta;
 import com.sunzequn.sdfs.socket.info.NodeUser;
 
+import java.io.File;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
@@ -30,7 +32,7 @@ public interface IDataNodeAction {
 
     public void writeRemoteFile(FileMeta fileMeta);
 
-    public void writeLocalFile(String path);
+    public void writeLocalFile(File file);
 
     public void updateActiveNodes(LinkedList<NodeInfo> activeNodes);
 
@@ -49,4 +51,17 @@ public interface IDataNodeAction {
     public void addUser();
 
     public void removeUser();
+
+    // 数据节点
+    public void updateActiveNodesLastTime(HashMap<String, Long> activeNodesLastTime);
+
+    // leader节点
+    public void updateActiveNodesLastTime(String id, Long time);
+
+    public HashMap<String, Long> getActiveNodesLastTime();
+
+    public void stop();
+
+    public void restart();
+
 }

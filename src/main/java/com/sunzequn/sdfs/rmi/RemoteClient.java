@@ -1,9 +1,12 @@
 package com.sunzequn.sdfs.rmi;
 
+import com.sunzequn.sdfs.file.FileMeta;
+
 import java.net.MalformedURLException;
 import java.rmi.Naming;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
+import java.util.List;
 
 /**
  * Created by sloriac on 16-12-19.
@@ -53,5 +56,15 @@ public class RemoteClient {
         } catch (NotBoundException | MalformedURLException | RemoteException e) {
             e.printStackTrace();
         }
+    }
+
+    public List<FileMeta> getFiles() {
+        try {
+            IRemote remote = (IRemote) Naming.lookup(name);
+            return remote.getFiles();
+        } catch (NotBoundException | MalformedURLException | RemoteException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 }

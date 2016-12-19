@@ -4,6 +4,7 @@ import com.sunzequn.sdfs.file.FileMeta;
 import com.sunzequn.sdfs.node.IDataNodeAction;
 import com.sunzequn.sdfs.node.NodeInfo;
 
+import java.io.File;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.rmi.RemoteException;
@@ -50,7 +51,7 @@ public class RemoteImpl extends UnicastRemoteObject implements IRemote {
 
     @Override
     public List<FileMeta> getFiles() throws RemoteException {
-        return null;
+        return nodeAction.getFilesInfo();
     }
 
     @Override
@@ -62,6 +63,11 @@ public class RemoteImpl extends UnicastRemoteObject implements IRemote {
     @Override
     public void exit() throws RemoteException {
         nodeAction.removeUser();
+    }
+
+    @Override
+    public void uploadFile(File file) throws RemoteException {
+        nodeAction.writeLocalFile(file);
     }
 
 

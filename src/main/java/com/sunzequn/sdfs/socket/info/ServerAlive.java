@@ -14,13 +14,15 @@ public class ServerAlive implements Serializable {
     private static final long serialVersionUID = 1L;
 
     private LinkedList<NodeInfo> activeNodes;
+    private HashMap<String, Long> activeNodesLastTime;
     private List<FileMeta> files;
     private List<NodeUser> nodeUsers;
 
-    public ServerAlive(LinkedList<NodeInfo> activeNodes, List<FileMeta> files, List<NodeUser> nodeUsers) {
+    public ServerAlive(LinkedList<NodeInfo> activeNodes, List<FileMeta> files, List<NodeUser> nodeUsers, HashMap<String, Long> activeNodesLastTime) {
         this.activeNodes = activeNodes;
         this.files = files;
         this.nodeUsers = nodeUsers;
+        this.activeNodesLastTime = activeNodesLastTime;
     }
 
     public LinkedList<NodeInfo> getActiveNodes() {
@@ -35,10 +37,15 @@ public class ServerAlive implements Serializable {
         return nodeUsers;
     }
 
+    public HashMap<String, Long> getActiveNodesLastTime() {
+        return activeNodesLastTime;
+    }
+
     @Override
     public String toString() {
         return "ServerAlive{" +
                 "activeNodes=" + activeNodes +
+                ", activeNodesLastTime=" + activeNodesLastTime +
                 ", files=" + files +
                 ", nodeUsers=" + nodeUsers +
                 '}';

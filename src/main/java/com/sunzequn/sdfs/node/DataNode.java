@@ -9,6 +9,10 @@ import com.sunzequn.sdfs.socket.info.NodeUser;
 import com.sunzequn.sdfs.socket.server.ServerThread;
 import com.sunzequn.sdfs.socket.server.SockServer;
 
+import java.io.File;
+import java.net.MalformedURLException;
+import java.rmi.NotBoundException;
+import java.rmi.RemoteException;
 import java.util.*;
 
 /**
@@ -23,8 +27,11 @@ public class DataNode implements IDataNodeAction {
     private boolean isLeader = false;
     // leader节点的相关信息
     private NodeInfo leaderInfo;
-    // 系统中活跃的其他兄弟节点
+    // 系统中活跃的其他兄弟节点,不包括leader
     private LinkedList<NodeInfo> activeNodes = new LinkedList<>();
+    private List<NodeInfo> deadNodes = new ArrayList<>();
+    // 活跃结点上次的活跃时间,不包括leader
+    private HashMap<String, Long> activeNodesLastTime = new HashMap<>();
     // 系统所有节点的用户数
     private List<NodeUser> nodeUsers = new ArrayList<>();
     // 自己节点的用户数据
@@ -73,10 +80,10 @@ public class DataNode implements IDataNodeAction {
     }
 
     @Override
-    public void writeLocalFile(String path) {
+    public void writeLocalFile(File file) {
         System.out.println("写入本地文件");
         // 写入本地
-        FileMeta fileMeta = fileHandler.writeLocalFile(path);
+        FileMeta fileMeta = fileHandler.writeLocalFile(file);
         //同步到leader
         sockClient.sendFile(fileMeta);
         //列表更新
@@ -139,6 +146,38 @@ public class DataNode implements IDataNodeAction {
     @Override
     public void removeUser() {
         myUser.setNum(myUser.getNum() - 1);
+    }
+
+    @Override
+    public void updateActiveNodesLastTime(HashMap<String, Long> activeNodesLastTime) {
+        if (isLeader) return;
+        this.activeNodesLastTime = activeNodesLastTime;
+    }
+
+    @Override
+    public void updateActiveNodesLastTime(String id, Long time) {
+        if (isLeader) return;
+        activeNodesLastTime.put(id, time);
+    }
+
+    @Override
+    public HashMap<String, Long> getActiveNodesLastTime() {
+        return activeNodesLastTime;
+    }
+
+    /**
+     * 关闭socket连接,但是服务还在
+     * 不选举新leader
+     */
+    @Override
+    public void stop() {
+        sockClient.stop(false);
+    }
+
+
+    @Override
+    public void restart() {
+        start(false);
     }
 
     @Override
@@ -256,5 +295,6 @@ public class DataNode implements IDataNodeAction {
         }
         return null;
     }
+
 
 }

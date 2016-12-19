@@ -60,11 +60,12 @@ public class SockClient {
     /**
      * 主节点故障
      */
-    public void stop() {
+    public void stop(boolean isUpdateLeader) {
         System.out.println("--连接中断--");
         try {
             socket.close();
-            nodeAction.updateLeader();
+            if (isUpdateLeader)
+                nodeAction.updateLeader();
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -83,7 +84,7 @@ public class SockClient {
             oos.flush();
         } catch (IOException e) {
             e.printStackTrace();
-            stop();
+            stop(true);
         }
     }
 
@@ -98,6 +99,7 @@ public class SockClient {
             nodeAction.updateActiveNodes(((ServerAlive) t).getActiveNodes());
             nodeAction.updateNodeUsers(((ServerAlive) t).getNodeUsers());
             nodeAction.updateFromLeaderFiles(((ServerAlive) t).getFiles());
+            nodeAction.updateActiveNodesLastTime(((ServerAlive) t).getActiveNodesLastTime());
         }
         // leader发来新文件
         else if (t instanceof FileMeta) {

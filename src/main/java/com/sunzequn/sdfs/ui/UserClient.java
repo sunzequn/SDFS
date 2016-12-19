@@ -11,7 +11,7 @@ public class UserClient extends JFrame {
 
     private Container container;
     private BoxLayout boxLayout;
-    private JPanel upperPanel;
+    private JScrollPane upperPanel;
     private JPanel midPanel;
     private JPanel bottomPanel;
     private JTextField portTextField;
@@ -35,9 +35,12 @@ public class UserClient extends JFrame {
     }
 
     private void initUpperPanel() {
-        upperPanel = new JPanel();
-        upperPanel.setLayout(new BorderLayout());
+        upperPanel = new JScrollPane();
+        upperPanel.setBackground(Color.black);
         upperPanel.setPreferredSize(new Dimension(400, 180));
+
+        //scrollPane.add();
+//        upperPanel.setViewportView();
         this.add(upperPanel);
     }
 
@@ -55,7 +58,7 @@ public class UserClient extends JFrame {
         infoLabel = new JLabel("", JLabel.CENTER);
 
         exitButton = new JButton("离开");
-        UserClientListener listener = new UserClientListener(portTextField, connectButton, exitButton, infoLabel);
+        UserClientListener listener = new UserClientListener(upperPanel, portTextField, connectButton, exitButton, infoLabel);
         connectButton.addActionListener(listener);
         exitButton.addActionListener(listener);
 
@@ -73,4 +76,5 @@ public class UserClient extends JFrame {
 
         this.add(bottomPanel);
     }
+
 }

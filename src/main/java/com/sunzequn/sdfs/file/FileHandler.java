@@ -30,12 +30,10 @@ public class FileHandler {
 
     /**
      * 将本地的源文件写入目标文件
-     * @param srcPath
      * @return
      */
-    public FileMeta writeLocalFile(String srcPath) {
+    public FileMeta writeLocalFile(File srcFile) {
         try {
-            File srcFile = new File(srcPath);
             byte[] contents = FileUtils.readFileToByteArray(srcFile);
             long size = srcFile.length();
             String name = srcFile.getName();

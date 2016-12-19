@@ -2,6 +2,7 @@ package com.sunzequn.sdfs.rmi;
 
 import com.sunzequn.sdfs.file.FileMeta;
 
+import java.io.File;
 import java.rmi.Remote;
 import java.rmi.RemoteException;
 import java.util.List;
@@ -20,4 +21,6 @@ public interface IRemote extends Remote {
     public String getNodeHost() throws RemoteException;
 
     public void exit() throws RemoteException;
+
+    public void uploadFile(File file) throws RemoteException;
 }
