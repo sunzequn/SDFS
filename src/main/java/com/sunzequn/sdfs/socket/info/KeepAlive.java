@@ -14,17 +14,19 @@ public class KeepAlive implements Serializable {
 
     private static final long serialVersionUID = 1L;
     private long lastTime;
-
     // 自己节点的相关信息
     private NodeInfo selfInfo;
     // 自己节点目前的文件
     private List<FileMeta> files;
+    // 自己当前的用户数
+    private NodeUser nodeUser;
 
 
-    public KeepAlive(NodeInfo selfInfo, List<FileMeta> files) {
+    public KeepAlive(NodeInfo selfInfo, List<FileMeta> files, NodeUser nodeUser) {
         this.lastTime = System.currentTimeMillis();
         this.selfInfo = selfInfo;
         this.files = files;
+        this.nodeUser = nodeUser;
     }
 
     public List<FileMeta> getFiles() {
@@ -35,12 +37,17 @@ public class KeepAlive implements Serializable {
         return selfInfo;
     }
 
+    public NodeUser getNodeUser() {
+        return nodeUser;
+    }
+
     @Override
     public String toString() {
         return "KeepAlive{" +
                 "lastTime=" + lastTime +
                 ", selfInfo=" + selfInfo +
                 ", files=" + files +
+                ", nodeUser=" + nodeUser +
                 '}';
     }
 }

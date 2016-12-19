@@ -9,9 +9,9 @@ import com.sunzequn.sdfs.node.NodeInfo;
 public class SockClient2Test {
 
     public static void main(String[] args) {
-        NodeInfo selfInfo = new NodeInfo("2", "localhost", 1002);
+        NodeInfo selfInfo = new NodeInfo("2", "localhost", 2222);
         NodeInfo leader = new NodeInfo("0", "localhost", 1111);
-        DataNode dataNode = new DataNode(selfInfo, leader, "/Users/Sloriac/Programing/github/SDFS/2/");
-        dataNode.start();
+        DataNode dataNode = new DataNode(selfInfo, leader, "/home/sloriac/data/2/");
+        dataNode.start(true);
     }
 }

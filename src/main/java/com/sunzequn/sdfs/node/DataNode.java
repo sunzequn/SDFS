@@ -2,8 +2,10 @@ package com.sunzequn.sdfs.node;
 
 import com.sunzequn.sdfs.file.FileHandler;
 import com.sunzequn.sdfs.file.FileMeta;
+import com.sunzequn.sdfs.rmi.RemoteServer;
 import com.sunzequn.sdfs.socket.client.SockClient;
 import com.sunzequn.sdfs.socket.info.Ask4File;
+import com.sunzequn.sdfs.socket.info.NodeUser;
 import com.sunzequn.sdfs.socket.server.ServerThread;
 import com.sunzequn.sdfs.socket.server.SockServer;
 
@@ -23,10 +25,15 @@ public class DataNode implements IDataNodeAction {
     private NodeInfo leaderInfo;
     // 系统中活跃的其他兄弟节点
     private LinkedList<NodeInfo> activeNodes = new LinkedList<>();
+    // 系统所有节点的用户数
+    private List<NodeUser> nodeUsers = new ArrayList<>();
+    // 自己节点的用户数据
+    private NodeUser myUser = new NodeUser(0);
     private SockClient sockClient;
     private SockServer sockServer;
     private List<FileMeta> files = new ArrayList<>();
     private Set<String> fileLocalNamesSyncLock = new HashSet<>();
+    private RemoteServer remoteServer;
 
     private String saveFolder;
     private FileHandler fileHandler;
@@ -48,15 +55,20 @@ public class DataNode implements IDataNodeAction {
         fileHandler = new FileHandler(saveFolder, selfInfo.getId());
     }
 
-    public void start() {
+    public void start(boolean isFirst) {
         // 异步开启leader端
         if (isLeader) {
             sockServer = new SockServer(this, selfInfo.getPort());
-            ServerThread serverThread = new ServerThread(sockServer);
-            serverThread.start();
+            System.out.println("leader启动socket服务" + selfInfo.getPort());
+            sockServer.start();
         }
         sockClient = new SockClient(this, leaderInfo.getIp(), leaderInfo.getPort(), selfInfo.getIp(), selfInfo.getPort(), selfInfo.getId());
         sockClient.start();
+        if (isFirst) {
+            // RMI端口是socket端口+1
+            remoteServer = new RemoteServer(this, selfInfo.getPort() + 1);
+            myUser.setNodeId(selfInfo.getId());
+        }
 
     }
 
@@ -80,6 +92,56 @@ public class DataNode implements IDataNodeAction {
     }
 
     @Override
+    public NodeInfo getFreeNode() {
+
+        for (NodeUser nodeUser : nodeUsers) {
+            if (nodeUser.getNum() < 5) {
+                return getNodeById(nodeUser.getNodeId());
+            }
+        }
+        //启动新节点
+        return null;
+    }
+
+    @Override
+    public List<NodeUser> getNodeUsers() {
+        return nodeUsers;
+    }
+
+    @Override
+    public void updateNodeUsers(List<NodeUser> nodeUsers) {
+        if (isLeader)
+            return;
+        this.nodeUsers = nodeUsers;
+    }
+
+    @Override
+    public void updateNodeUser(NodeUser nodeUser) {
+        for (NodeUser user : nodeUsers) {
+            if (user.getNodeId().equals(nodeUser.getNodeId())) {
+                user.setNum(nodeUser.getNum());
+                return;
+            }
+        }
+        nodeUsers.add(nodeUser);
+    }
+
+    @Override
+    public NodeUser getMyUser() {
+        return myUser;
+    }
+
+    @Override
+    public void addUser() {
+        myUser.setNum(myUser.getNum() + 1);
+    }
+
+    @Override
+    public void removeUser() {
+        myUser.setNum(myUser.getNum() - 1);
+    }
+
+    @Override
     public void writeRemoteFile(FileMeta fileMeta) {
         System.out.println("写入远端文件");
         fileHandler.writeRemoteFile(fileMeta);
@@ -97,9 +159,13 @@ public class DataNode implements IDataNodeAction {
 
     @Override
     public void updateLeader() {
+        if (activeNodes.size() == 0) return;
+        NodeInfo pleader = leaderInfo;
         leaderInfo = activeNodes.pop();
         long sleepTime = 1000;
         if (leaderInfo.getId().equals(selfInfo.getId())) {
+            //过滤掉nodeusers里面的原先leader节点
+            nodeUsers = resetNodeUsers(pleader);
             isLeader = true;
             sleepTime = 10;
         }
@@ -108,14 +174,24 @@ public class DataNode implements IDataNodeAction {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-        start();
+        start(false);
         System.out.println("选举新的leader节点：" + leaderInfo);
+    }
+
+    private List<NodeUser> resetNodeUsers(NodeInfo pleader) {
+        List<NodeUser> newNodeUsers = new ArrayList<>();
+        for (NodeUser nodeUser : nodeUsers) {
+            if (!nodeUser.getNodeId().equals(pleader.getId())) {
+                newNodeUsers.add(nodeUser);
+            }
+        }
+        return newNodeUsers;
     }
 
     @Override
     public void updateFromLeaderFiles(List<FileMeta> leaderFiles) {
-        System.out.println("本地" + files);
-        System.out.println("leader" + leaderFiles);
+//        System.out.println("本地" + files);
+//        System.out.println("leader" + leaderFiles);
         //检查锁，还有在同步的文件
         if (fileLocalNamesSyncLock.size() > 0)
             return;
@@ -169,6 +245,16 @@ public class DataNode implements IDataNodeAction {
                 fileLocalNamesSyncLock.add(newFile.getLocalName());
             }
         }
+    }
+
+    private NodeInfo getNodeById(String id) {
+        if (getLeaderNode().getId().equals(id))
+            return getLeaderNode();
+        for (NodeInfo activeNode : activeNodes) {
+            if (activeNode.getId().equals(id))
+                return activeNode;
+        }
+        return null;
     }
 
 }

@@ -34,13 +34,12 @@ public class SockServer {
     public void start() {
         try {
             serverSocket = new ServerSocket(port);
+            System.out.println(serverSocket);
             for (NodeInfo nodeInfo : nodeAction.getActiveNodesInfo()) {
                 ids.add(nodeInfo.getId());
             }
-            while (true) {
-                Socket socket = serverSocket.accept();
-                new Thread(new SockServerHandler(socket, this)).start();
-            }
+            ServerThread serverThread = new ServerThread(this, serverSocket);
+            serverThread.start();
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -58,6 +57,7 @@ public class SockServer {
     }
 
     public void handleHeart(KeepAlive keepAlive, Socket socket) {
+        System.out.println("客户端心跳: " + keepAlive);
         String clientId = keepAlive.getSelfInfo().getId();
         // ids保存左右节点
         if (!ids.contains(clientId)) {
@@ -67,8 +67,10 @@ public class SockServer {
             if (!clientId.equals(nodeAction.getLeaderNode().getId()))
                 nodeAction.getActiveNodesInfo().add(keepAlive.getSelfInfo());
         }
-        sendInfo(new ServerAlive(nodeAction.getActiveNodesInfo(), nodeAction.getFilesInfo()), socket);
+        nodeAction.updateNodeUser(keepAlive.getNodeUser());
+        sendInfo(new ServerAlive(nodeAction.getActiveNodesInfo(), nodeAction.getFilesInfo(), nodeAction.getNodeUsers()), socket);
     }
+
 
     public void handleNewFile(FileMeta fileMeta) {
         // 转发给其他节点

@@ -15,13 +15,13 @@ import java.net.Socket;
  */
 public class SockClient {
 
-    private static final int DELAY = 500;
+    private static final int DELAY = 1000;
 
     // 用于回调
     private IDataNodeAction nodeAction;
 
     private String serverIp;
-    private int ServerPort;
+    private int serverPort;
 
     private String clientIp;
     private int clientPort;
@@ -37,7 +37,7 @@ public class SockClient {
     public SockClient(IDataNodeAction nodeAction, String serverIp, int serverPort, String clientIp, int clientPort, String id) {
         this.nodeAction = nodeAction;
         this.serverIp = serverIp;
-        ServerPort = serverPort;
+        this.serverPort = serverPort;
         this.clientIp = clientIp;
         this.clientPort = clientPort;
         this.id = id;
@@ -45,7 +45,8 @@ public class SockClient {
 
     public void start() {
         try {
-            socket = new Socket(serverIp, ServerPort);
+            System.out.println(serverIp + serverPort);
+            socket = new Socket(serverIp, serverPort);
             lastTime = System.currentTimeMillis();
             keepAliveHandler = new KeepAliveHandler(lastTime, this);
             keepAliveHandler.start();
@@ -87,14 +88,15 @@ public class SockClient {
     }
 
     public void sendAliveInfo() {
-        KeepAlive keepAlive = new KeepAlive(nodeAction.getSelfNode(), nodeAction.getFilesInfo());
+        KeepAlive keepAlive = new KeepAlive(nodeAction.getSelfNode(), nodeAction.getFilesInfo(), nodeAction.getMyUser());
         sendInfo(keepAlive);
     }
 
     public <T> void receive(T t) {
-//        System.out.println("收到信息: " + t);
+        System.out.println("收到信息: " + t);
         if (t instanceof ServerAlive) {
             nodeAction.updateActiveNodes(((ServerAlive) t).getActiveNodes());
+            nodeAction.updateNodeUsers(((ServerAlive) t).getNodeUsers());
             nodeAction.updateFromLeaderFiles(((ServerAlive) t).getFiles());
         }
         // leader发来新文件
@@ -113,7 +115,7 @@ public class SockClient {
     }
 
     public int getServerPort() {
-        return ServerPort;
+        return serverPort;
     }
 
     public String getClientIp() {

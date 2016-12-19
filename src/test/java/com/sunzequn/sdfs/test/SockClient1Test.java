@@ -9,10 +9,10 @@ import com.sunzequn.sdfs.node.NodeInfo;
 public class SockClient1Test {
 
     public static void main(String[] args) {
-        NodeInfo selfInfo = new NodeInfo("1", "localhost", 1001);
+        NodeInfo selfInfo = new NodeInfo("1", "localhost", 9999);
         NodeInfo leader = new NodeInfo("0", "localhost", 1111);
-        DataNode dataNode = new DataNode(selfInfo, leader, "/Users/Sloriac/Programing/github/SDFS/1/");
-        dataNode.start();
-        dataNode.writeLocalFile("/Users/Sloriac/Programing/github/SDFS/src/test/java/com/sunzequn/sdfs/test/SockClient1Test.java");
+        DataNode dataNode = new DataNode(selfInfo, leader, "/home/sloriac/data/1/");
+        dataNode.start(true);
+        dataNode.writeLocalFile("/home/sloriac/data/test");
     }
 }

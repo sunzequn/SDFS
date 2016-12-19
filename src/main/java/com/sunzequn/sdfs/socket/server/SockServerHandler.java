@@ -31,7 +31,6 @@ public class SockServerHandler extends Thread {
                     Object obj = ois.readObject();
                     // 心跳测试
                     if (obj instanceof KeepAlive) {
-//                        System.out.println("客户端心跳: " + obj.toString());
                         sockServer.handleHeart((KeepAlive) obj, socket);
                     }
                     // 新文件传输

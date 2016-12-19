@@ -1,6 +1,7 @@
 package com.sunzequn.sdfs.node;
 
 import com.sunzequn.sdfs.file.FileMeta;
+import com.sunzequn.sdfs.socket.info.NodeUser;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -32,4 +33,20 @@ public interface IDataNodeAction {
     public void writeLocalFile(String path);
 
     public void updateActiveNodes(LinkedList<NodeInfo> activeNodes);
+
+    public NodeInfo getFreeNode();
+
+    public List<NodeUser> getNodeUsers();
+
+    //数据节点用的
+    public void updateNodeUsers(List<NodeUser> nodeUsers);
+
+    //leader节点用的
+    public void updateNodeUser(NodeUser nodeUser);
+
+    public NodeUser getMyUser();
+
+    public void addUser();
+
+    public void removeUser();
 }

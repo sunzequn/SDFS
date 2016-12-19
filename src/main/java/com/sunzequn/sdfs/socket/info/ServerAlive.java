@@ -4,10 +4,7 @@ import com.sunzequn.sdfs.file.FileMeta;
 import com.sunzequn.sdfs.node.NodeInfo;
 
 import java.io.Serializable;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Created by Sloriac on 2016/12/18.
@@ -18,10 +15,12 @@ public class ServerAlive implements Serializable {
 
     private LinkedList<NodeInfo> activeNodes;
     private List<FileMeta> files;
+    private List<NodeUser> nodeUsers;
 
-    public ServerAlive(LinkedList<NodeInfo> activeNodes, List<FileMeta> files) {
+    public ServerAlive(LinkedList<NodeInfo> activeNodes, List<FileMeta> files, List<NodeUser> nodeUsers) {
         this.activeNodes = activeNodes;
         this.files = files;
+        this.nodeUsers = nodeUsers;
     }
 
     public LinkedList<NodeInfo> getActiveNodes() {
@@ -32,11 +31,16 @@ public class ServerAlive implements Serializable {
         return files;
     }
 
+    public List<NodeUser> getNodeUsers() {
+        return nodeUsers;
+    }
+
     @Override
     public String toString() {
         return "ServerAlive{" +
                 "activeNodes=" + activeNodes +
                 ", files=" + files +
+                ", nodeUsers=" + nodeUsers +
                 '}';
     }
 }
