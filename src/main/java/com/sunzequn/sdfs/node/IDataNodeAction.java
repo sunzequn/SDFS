@@ -70,5 +70,6 @@ public interface IDataNodeAction {
 
     public void updateTotlaUserNun(Integer num);
 
+    public void removeDeadNode(Set<String> ids);
 
 }

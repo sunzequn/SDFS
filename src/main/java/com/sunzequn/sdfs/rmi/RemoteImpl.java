@@ -3,6 +3,7 @@ package com.sunzequn.sdfs.rmi;
 import com.sunzequn.sdfs.file.FileMeta;
 import com.sunzequn.sdfs.node.IDataNodeAction;
 import com.sunzequn.sdfs.node.NodeInfo;
+import com.sunzequn.sdfs.utils.TimeUtil;
 
 import java.io.File;
 import java.net.InetAddress;
@@ -28,14 +29,7 @@ public class RemoteImpl extends UnicastRemoteObject implements IRemote {
 
     @Override
     public String generateTime() throws RemoteException {
-        Calendar calendar = Calendar.getInstance();
-        int year = calendar.get(Calendar.YEAR);
-        int month = calendar.get(Calendar.MONTH);
-        int date = calendar.get(Calendar.DATE);
-        int hour = calendar.get(Calendar.HOUR_OF_DAY);
-        int minute = calendar.get(Calendar.MINUTE);
-        int second = calendar.get(Calendar.SECOND);
-        return (year + "/" + month + "/" + date + " " + hour + ":" + minute + ":" + second);
+        return TimeUtil.generateTime();
     }
 
     @Override
@@ -69,6 +63,11 @@ public class RemoteImpl extends UnicastRemoteObject implements IRemote {
     @Override
     public void uploadFile(File file, byte[] contents) throws RemoteException {
         nodeAction.uploadFile(file, contents);
+    }
+
+    @Override
+    public int getTotalUserNum() throws RemoteException {
+        return nodeAction.getTotalUserNum();
     }
 
 

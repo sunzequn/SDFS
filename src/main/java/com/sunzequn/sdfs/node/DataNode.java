@@ -30,7 +30,7 @@ public class DataNode implements IDataNodeAction {
     private NodeInfo leaderInfo;
     // 系统中活跃的其他兄弟节点,不包括leader
     private LinkedList<NodeInfo> activeNodes = new LinkedList<>();
-    private List<NodeInfo> deadNodes = new ArrayList<>();
+    private LinkedList<NodeInfo> deadNodes = new LinkedList<>();
     // 活跃结点上次的活跃时间,不包括leader
     private HashMap<String, Long> activeNodesLastTime = new HashMap<>();
     // 系统所有节点的用户数
@@ -42,6 +42,10 @@ public class DataNode implements IDataNodeAction {
     private List<FileMeta> files = new ArrayList<>();
     //同步服务器文件的锁,防止重复同步
     private Set<String> fileSyncLock = new HashSet<>();
+    // 写入远端文件的锁,保证文件的最终一致性
+    private Set<String> remoteFileLock = new HashSet<>();
+    private Map<String, String> remoteFileTimeMap = new HashMap<>();
+
     private RemoteServer remoteServer;
     private RemoteClient remoteClient;
 
@@ -73,6 +77,8 @@ public class DataNode implements IDataNodeAction {
             sockServer = new SockServer(this, selfInfo.getPort());
             System.out.println("leader启动socket服务" + selfInfo.getPort());
             sockServer.start();
+            DeadNodesFinderThread deadNodesFinderThread = new DeadNodesFinderThread(this);
+            deadNodesFinderThread.start();
         }
         sockClient = new SockClient(this, leaderInfo.getIp(), leaderInfo.getPort(), selfInfo.getIp(), selfInfo.getPort(), selfInfo.getId());
         sockClient.start();
@@ -127,7 +133,10 @@ public class DataNode implements IDataNodeAction {
                 return getNodeById(nodeUser.getNodeId());
             }
         }
-        //启动新节点
+        //启动新节点 >
+        if (deadNodes.size() > 0) {
+
+        }
         return null;
     }
 
@@ -178,7 +187,6 @@ public class DataNode implements IDataNodeAction {
 
     @Override
     public void updateActiveNodesLastTime(String id, Long time) {
-        if (isLeader) return;
         activeNodesLastTime.put(id, time);
     }
 
@@ -214,14 +222,40 @@ public class DataNode implements IDataNodeAction {
     }
 
     @Override
+    public void removeDeadNode(Set<String> ids) {
+        LinkedList<NodeInfo> nodeInfos = new LinkedList<>();
+        for (NodeInfo activeNode : activeNodes) {
+            if (!ids.contains(activeNode.getId())) {
+                nodeInfos.add(activeNode);
+            }
+        }
+        activeNodes = nodeInfos;
+        for (String id : ids) {
+            activeNodesLastTime.remove(id);
+        }
+    }
+
+    @Override
     public void writeRemoteFile(FileMeta fileMeta) {
+        //有锁
+        if (remoteFileLock.contains(fileMeta.getName())) {
+            //比较新旧
+            if (remoteFileTimeMap.get(fileMeta.getName()).compareTo(fileMeta.getTimestamp()) > 1) {
+                //旧文件不写入
+                return;
+            }
+        }
         System.out.println("写入远端文件");
+        remoteFileLock.add(fileMeta.getName());
+        remoteFileTimeMap.put(fileMeta.getName(), fileMeta.getTimestamp());
         fileHandler.writeRemoteFile(fileMeta);
         if (fileSyncLock.contains(fileMeta.getName())) {
             fileSyncLock.remove(fileMeta.getName());
         }
         fileMeta.setContents(null);
         files.add(fileMeta);
+        remoteFileLock.remove(fileMeta.getName());
+        remoteFileTimeMap.remove(fileMeta.getName());
     }
 
     @Override

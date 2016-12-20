@@ -108,26 +108,6 @@ public class SockClient {
         }
     }
 
-    public String getId() {
-        return id;
-    }
-
-    public String getServerIp() {
-        return serverIp;
-    }
-
-    public int getServerPort() {
-        return serverPort;
-    }
-
-    public String getClientIp() {
-        return clientIp;
-    }
-
-    public int getClientPort() {
-        return clientPort;
-    }
-
     public static int getDELAY() {
         return DELAY;
     }

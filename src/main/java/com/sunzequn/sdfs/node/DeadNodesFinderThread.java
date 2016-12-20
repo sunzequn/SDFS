@@ -2,48 +2,43 @@ package com.sunzequn.sdfs.node;
 
 import com.sunzequn.sdfs.socket.client.SockClient;
 
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Created by sloriac on 16-12-19.
  */
 public class DeadNodesFinderThread extends Thread {
 
-    private LinkedList<NodeInfo> activeNodes;
-    private HashMap<String, Long> activeNodesLastTime;
-    private List<NodeInfo> deadNodes;
+    private IDataNodeAction dataNodeAction;
 
-    public DeadNodesFinderThread(LinkedList<NodeInfo> activeNodes, HashMap<String, Long> activeNodesLastTime, List<NodeInfo> deadNodes) {
-        this.activeNodes = activeNodes;
-        this.activeNodesLastTime = activeNodesLastTime;
-        this.deadNodes = deadNodes;
+    public DeadNodesFinderThread(IDataNodeAction dataNodeAction) {
+        this.dataNodeAction = dataNodeAction;
     }
 
     @Override
     public void run() {
-        long total = 0;
-        for (Map.Entry<String, Long> stringLongEntry : activeNodesLastTime.entrySet()) {
-            total += stringLongEntry.getValue();
-        }
-        double avg = total / activeNodesLastTime.keySet().size();
-        for (String s : activeNodesLastTime.keySet()) {
-            double cha = activeNodesLastTime.get(s) - avg;
-            if (cha > 0 && cha < 5 * SockClient.getDELAY()) {
-                removeDeadNode(s);
+        while (true) {
+            System.out.println("失效节点检测");
+            LinkedList<NodeInfo> activeNodes = dataNodeAction.getActiveNodesInfo();
+            HashMap<String, Long> activeNodesLastTime = dataNodeAction.getActiveNodesLastTime();
+            if (activeNodes.size() > 0) {
+                //如果节点的上次活跃时间和当前时间相比，落后5个间隔，就认为该节点失效
+                long now = System.currentTimeMillis();
+                Set<String> deadIds = new HashSet<>();
+                for (Map.Entry<String, Long> stringLongEntry : activeNodesLastTime.entrySet()) {
+                    if (now - stringLongEntry.getValue() > 5 * SockClient.getDELAY()) {
+                        System.out.println("节点 " + stringLongEntry.getKey() + " 失效");
+                        deadIds.add(stringLongEntry.getKey());
+                    }
+                }
+                dataNodeAction.removeDeadNode(deadIds);
+            }
+            try {
+                Thread.sleep(5 * SockClient.getDELAY());
+            } catch (InterruptedException e) {
+                e.printStackTrace();
             }
         }
     }
 
-    private void removeDeadNode(String s) {
-        LinkedList<NodeInfo> newNodes = new LinkedList<>();
-        for (NodeInfo activeNode : activeNodes) {
-            if (!activeNode.getId().equals(s))
-                newNodes.add(activeNode);
-            else
-                deadNodes.add(activeNode);
-        }
-    }
 }

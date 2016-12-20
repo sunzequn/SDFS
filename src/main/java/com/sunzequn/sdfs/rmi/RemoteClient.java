@@ -72,4 +72,14 @@ public class RemoteClient {
             e.printStackTrace();
         }
     }
+
+    public int getTotalUserNum() {
+        try {
+            IRemote remote = (IRemote) Naming.lookup(name);
+            return remote.getTotalUserNum();
+        } catch (NotBoundException | MalformedURLException | RemoteException e) {
+            e.printStackTrace();
+        }
+        return 0;
+    }
 }

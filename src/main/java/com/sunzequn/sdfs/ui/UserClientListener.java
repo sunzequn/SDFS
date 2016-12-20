@@ -10,6 +10,8 @@ import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.rmi.RemoteException;
 import java.util.List;
 
@@ -23,7 +25,7 @@ public class UserClientListener implements ActionListener {
     private JTextField portTextField;
     private JButton connectButton;
     private JLabel infoLabel;
-    ClientTimeThread clientTimeThread;
+    private ClientTimeThread clientTimeThread;
 
     public UserClientListener(JScrollPane upperPanel, JTextField portTextField, JButton connectButton, JLabel infoLabel) {
         this.upperPanel = upperPanel;
@@ -40,7 +42,10 @@ public class UserClientListener implements ActionListener {
                 case "连接":
                     handleConnectButton();
                     break;
-                case "离开":
+                case "登录":
+                    handleLoginButton();
+                    break;
+                case "退出":
                     handleExitButton();
                     break;
                 default:
@@ -57,27 +62,41 @@ public class UserClientListener implements ActionListener {
     private void handleConnectButton() throws RemoteException {
         String port = portTextField.getText();
         if (!port.equals("") && port.contains(":")) {
+            infoLabel.setText("参数错误，请重试！");
             //链接leader请求分配数据节点
             RemoteClient remoteClient = new RemoteClient(port);
             //获得数据节点
             DataNodeUrl.dataNodeUrl = remoteClient.getNode();
-            System.out.println(DataNodeUrl.dataNodeUrl);
-            remoteClient = new RemoteClient(DataNodeUrl.dataNodeUrl);
-            //获取ip注册一下
-            String ip = remoteClient.getIp();
-            display(remoteClient, ip);
-            List<FileMeta> files = remoteClient.getFiles();
-            if (files != null && files.size() > 0) {
-                showFiles(files);
-            }
-            connectButton.setText("离开");
+            display(remoteClient, port.split(":")[0]);
+            connectButton.setText("登录");
         } else {
             infoLabel.setText("参数错误，请重试！");
         }
     }
 
+    private void handleLoginButton() throws RemoteException, UnknownHostException {
+        String port = portTextField.getText();
+        if (!port.equals("") && port.contains(":")) {
+            RemoteClient remoteClient = new RemoteClient(DataNodeUrl.dataNodeUrl);
+            //获取ip注册一下
+            String ip = remoteClient.getIp();
+            ip = InetAddress.getLocalHost().getHostAddress();
+            int userNum = remoteClient.getTotalUserNum();
+            clientTimeThread.stop();
+            infoLabel.setText("本地: " + ip + ",  您是系统第" + userNum + "位用户");
+            List<FileMeta> files = remoteClient.getFiles();
+            if (files != null && files.size() > 0) {
+                showFiles(files);
+            }
+            connectButton.setText("退出");
+        } else {
+            infoLabel.setText("参数错误，请重试！");
+        }
+    }
+
+
     private void display(RemoteClient remoteClient, String ip) throws RemoteException {
-        ClientTimeThread clientTimeThread = new ClientTimeThread(remoteClient, infoLabel, ip);
+        clientTimeThread = new ClientTimeThread(remoteClient, infoLabel, ip);
         clientTimeThread.start();
     }
 
@@ -86,6 +105,8 @@ public class UserClientListener implements ActionListener {
         RemoteClient remoteClient = new RemoteClient(DataNodeUrl.dataNodeUrl);
         remoteClient.exit();
         connectButton.setText("连接");
+        clientTimeThread.stop();
+        infoLabel.setText("");
     }
 
     private void showFiles(List<FileMeta> files) {
