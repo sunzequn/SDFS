@@ -35,14 +35,9 @@ public class RemoteClient {
         return null;
     }
 
-    public String getNode() {
-        try {
-            IRemote remote = (IRemote) Naming.lookup(name);
-            return remote.getNodeHost();
-        } catch (NotBoundException | MalformedURLException | RemoteException e) {
-            e.printStackTrace();
-        }
-        return null;
+    public String getNode() throws RemoteException, NotBoundException, MalformedURLException {
+        IRemote remote = (IRemote) Naming.lookup(name);
+        return remote.getNodeHost();
     }
 
     public void exit() {
@@ -54,14 +49,9 @@ public class RemoteClient {
         }
     }
 
-    public List<FileMeta> getFiles() {
-        try {
-            IRemote remote = (IRemote) Naming.lookup(name);
-            return remote.getFiles();
-        } catch (NotBoundException | MalformedURLException | RemoteException e) {
-            e.printStackTrace();
-        }
-        return null;
+    public List<FileMeta> getFiles() throws RemoteException, NotBoundException, MalformedURLException {
+        IRemote remote = (IRemote) Naming.lookup(name);
+        return remote.getFiles();
     }
 
     public void uploadFile(File file, byte[] contents) {

@@ -40,7 +40,8 @@ public class ConnectionThread extends Thread {
                 }
             }
             try {
-                Thread.sleep(20 * SockClient.getDELAY());
+                //时间设置长一点
+                Thread.sleep(60 * SockClient.getDELAY());
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
