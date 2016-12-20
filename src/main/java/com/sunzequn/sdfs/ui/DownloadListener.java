@@ -32,7 +32,9 @@ public class DownloadListener implements ActionListener {
         if (result == JFileChooser.APPROVE_OPTION) {
             File file = jFileChooser.getSelectedFile();
             if (DataNodeUrl.dataNodeUrl != null) {
+                System.out.println(DataNodeUrl.dataNodeUrl);
                 RemoteClient remoteClient = new RemoteClient(DataNodeUrl.dataNodeUrl);
+                System.out.println(remoteClient);
                 try {
                     byte[] contents = remoteClient.downloadFile(fileMeta.getName());
                     FileUtils.writeByteArrayToFile(file, contents);

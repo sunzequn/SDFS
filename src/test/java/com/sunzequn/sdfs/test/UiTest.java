@@ -17,5 +17,4 @@ public class UiTest {
         myFrame.setVisible(true);
     }
 
-
 }

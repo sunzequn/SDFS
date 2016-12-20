@@ -16,6 +16,8 @@ import java.net.UnknownHostException;
 import java.rmi.RemoteException;
 import java.util.List;
 
+import static java.lang.Thread.sleep;
+
 /**
  * Created by sloriac on 16-12-19.
  */
@@ -92,9 +94,21 @@ public class UserClientListener implements ActionListener {
             clientTimeThread.stop();
             infoLabel.setText("本地: " + ip + ",  您是系统第" + totalUserNum + "位用户");
             List<FileMeta> files = remoteClient.getFiles();
-            if (files != null && files.size() > 0) {
-                showFiles(files);
-            }
+            showFiles(files);
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    while (true) {
+                        List<FileMeta> files = remoteClient.getFiles();
+                        showFiles(files);
+                        try {
+                            Thread.sleep(1000);
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }
+            }).start();
             connectButton.setText("退出");
         } else {
             infoLabel.setText("参数错误，请重试！");

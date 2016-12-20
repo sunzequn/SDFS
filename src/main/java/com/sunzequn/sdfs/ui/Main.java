@@ -4,6 +4,7 @@ import com.sunzequn.sdfs.node.DataNode;
 import com.sunzequn.sdfs.node.NodeInfo;
 import com.sunzequn.sdfs.utils.PropertiesUtil;
 
+import javax.swing.*;
 import java.util.Arrays;
 
 /**
@@ -13,7 +14,10 @@ public class Main {
 
     public static void main(String[] args) {
         if (args.length == 0) {
-            System.out.println("请输入参数(配置文件路径)");
+            UserClient myFrame = new UserClient("客户端");
+            myFrame.setSize(400, 260);
+            myFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+            myFrame.setVisible(true);
         } else {
             String path = args[0];
             PropertiesUtil util = null;
@@ -30,7 +34,7 @@ public class Main {
 
                     NodeInfo selfInfo = new NodeInfo(id, "localhost", Integer.parseInt(localPort));
                     NodeInfo leader = new NodeInfo(leaderId, leaderIp, Integer.parseInt(leaderPort));
-                    DataNode dataNode = new DataNode(selfInfo, leader, "/home/sloriac/data/1/");
+                    DataNode dataNode = new DataNode(selfInfo, leader, folder);
                     dataNode.start(true);
 
                 } else {

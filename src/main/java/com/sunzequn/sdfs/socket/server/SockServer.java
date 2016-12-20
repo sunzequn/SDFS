@@ -76,7 +76,6 @@ public class SockServer {
         Set<String> ids = nodeAction.getActiveNodeIds();
         // 转发给其他节点
         System.out.println("leader 收到新文件：" + fileMeta.getName() + ", 转发给" + ids);
-        System.out.println(fileMeta);
         for (String id : ids) {
             if (!id.equals(fileMeta.getSrcNode())) {
                 sendInfo(fileMeta, socketMap.get(id));

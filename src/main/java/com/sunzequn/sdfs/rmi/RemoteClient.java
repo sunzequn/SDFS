@@ -83,10 +83,10 @@ public class RemoteClient {
         return 0;
     }
 
-    public byte[] downloadFile(String name) {
+    public byte[] downloadFile(String fileName) {
         try {
             IRemote remote = (IRemote) Naming.lookup(name);
-            return remote.downloadFile(name);
+            return remote.downloadFile(fileName);
         } catch (NotBoundException | MalformedURLException | RemoteException e) {
             e.printStackTrace();
         }
