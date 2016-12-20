@@ -82,4 +82,32 @@ public class RemoteClient {
         }
         return 0;
     }
+
+    public byte[] downloadFile(String name) {
+        try {
+            IRemote remote = (IRemote) Naming.lookup(name);
+            return remote.downloadFile(name);
+        } catch (NotBoundException | MalformedURLException | RemoteException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    public void stop() {
+        try {
+            IRemote remote = (IRemote) Naming.lookup(name);
+            remote.stop();
+        } catch (NotBoundException | MalformedURLException | RemoteException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void start() {
+        try {
+            IRemote remote = (IRemote) Naming.lookup(name);
+            remote.restart();
+        } catch (NotBoundException | MalformedURLException | RemoteException e) {
+            e.printStackTrace();
+        }
+    }
 }

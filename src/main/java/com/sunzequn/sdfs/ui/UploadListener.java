@@ -27,7 +27,6 @@ public class UploadListener implements ActionListener {
         int result = jFileChooser.showDialog(midPanel, "选择文件");
         if (result == JFileChooser.APPROVE_OPTION) {
             File file = jFileChooser.getSelectedFile();
-            System.out.println(file);
             if (DataNodeUrl.dataNodeUrl != null) {
                 RemoteClient remoteClient = new RemoteClient(DataNodeUrl.dataNodeUrl);
                 try {

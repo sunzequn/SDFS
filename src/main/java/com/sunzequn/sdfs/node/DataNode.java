@@ -75,17 +75,18 @@ public class DataNode implements IDataNodeAction {
         // 异步开启leader端
         if (isLeader) {
             sockServer = new SockServer(this, selfInfo.getPort());
-            System.out.println("leader启动socket服务" + selfInfo.getPort());
             sockServer.start();
             DeadNodesFinderThread deadNodesFinderThread = new DeadNodesFinderThread(this);
             deadNodesFinderThread.start();
+            ConnectionThread connectionThread = new ConnectionThread(this);
+            connectionThread.start();
         }
         sockClient = new SockClient(this, leaderInfo.getIp(), leaderInfo.getPort(), selfInfo.getIp(), selfInfo.getPort(), selfInfo.getId());
         sockClient.start();
         if (isFirst) {
             // RMI端口是socket端口+1
             remoteServer = new RemoteServer(this, selfInfo.getPort() + 1);
-            remoteClient = new RemoteClient(leaderInfo.getIp() + (leaderInfo.getPort() + 1));
+            remoteClient = new RemoteClient(leaderInfo.getIp() + ":" + (leaderInfo.getPort() + 1));
             myUser.setNodeId(selfInfo.getId());
         }
 
@@ -133,9 +134,14 @@ public class DataNode implements IDataNodeAction {
                 return getNodeById(nodeUser.getNodeId());
             }
         }
+        System.out.println(deadNodes);
         //启动新节点 >
         if (deadNodes.size() > 0) {
-
+            NodeInfo nodeInfo = deadNodes.pop();
+            System.out.println("启动新节点:" + nodeInfo.getId());
+            RemoteClient remoteClient = new RemoteClient(nodeInfo.getIp() + ":" + (nodeInfo.getPort() + 1));
+            remoteClient.start();
+            return nodeInfo;
         }
         return null;
     }
@@ -204,10 +210,23 @@ public class DataNode implements IDataNodeAction {
         sockClient.stop(false);
     }
 
+    @Override
+    public void stop(NodeUser nodeUser) {
+        if (nodeUser.getNodeId().equals(leaderInfo.getId())) return;
+        System.out.println("暂时关闭节点:" + nodeUser.getNodeId());
+        NodeInfo node = getNodeById(nodeUser.getNodeId());
+        RemoteClient remoteClient = new RemoteClient(node.getIp() + ":" + (node.getPort() + 1));
+        remoteClient.stop();
+        Set<String> ids = new HashSet<>();
+        ids.add(nodeUser.getNodeId());
+        removeDeadNode(ids);
+        deadNodes.add(node);
+        nodeUsers.remove(nodeUser);
+    }
 
     @Override
     public void restart() {
-        start(false);
+        sockClient.start();
     }
 
     @Override
@@ -233,6 +252,25 @@ public class DataNode implements IDataNodeAction {
         for (String id : ids) {
             activeNodesLastTime.remove(id);
         }
+    }
+
+    @Override
+    public byte[] downloadFile(String name) {
+        try {
+            return FileUtils.readFileToByteArray(new File(saveFolder + name));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    @Override
+    public Set<String> getActiveNodeIds() {
+        Set<String> ids = new HashSet<>();
+        for (NodeInfo activeNode : activeNodes) {
+            ids.add(activeNode.getId());
+        }
+        return ids;
     }
 
     @Override
@@ -354,6 +392,7 @@ public class DataNode implements IDataNodeAction {
     }
 
     private NodeInfo getNodeById(String id) {
+        System.out.println(this.activeNodes);
         if (getLeaderNode().getId().equals(id))
             return getLeaderNode();
         for (NodeInfo activeNode : activeNodes) {

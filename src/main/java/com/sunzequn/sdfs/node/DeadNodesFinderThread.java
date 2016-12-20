@@ -17,6 +17,11 @@ public class DeadNodesFinderThread extends Thread {
 
     @Override
     public void run() {
+        try {
+            Thread.sleep(10000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
         while (true) {
             System.out.println("失效节点检测");
             LinkedList<NodeInfo> activeNodes = dataNodeAction.getActiveNodesInfo();

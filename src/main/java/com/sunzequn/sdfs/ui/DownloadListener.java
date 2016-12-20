@@ -1,11 +1,14 @@
 package com.sunzequn.sdfs.ui;
 
 import com.sunzequn.sdfs.file.FileMeta;
+import com.sunzequn.sdfs.rmi.RemoteClient;
+import org.apache.commons.io.FileUtils;
 
 import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
+import java.io.IOException;
 
 /**
  * Created by sloriac on 16-12-19.
@@ -28,7 +31,15 @@ public class DownloadListener implements ActionListener {
         int result = jFileChooser.showDialog(upperPanel, "保存文件");
         if (result == JFileChooser.APPROVE_OPTION) {
             File file = jFileChooser.getSelectedFile();
-            System.out.println(file.getPath());
+            if (DataNodeUrl.dataNodeUrl != null) {
+                RemoteClient remoteClient = new RemoteClient(DataNodeUrl.dataNodeUrl);
+                try {
+                    byte[] contents = remoteClient.downloadFile(fileMeta.getName());
+                    FileUtils.writeByteArrayToFile(file, contents);
+                } catch (Exception e1) {
+                    e1.printStackTrace();
+                }
+            }
         }
     }
 }

@@ -25,4 +25,10 @@ public interface IRemote extends Remote {
     public void uploadFile(File file, byte[] contents) throws RemoteException;
 
     public int getTotalUserNum() throws RemoteException;
+
+    public byte[] downloadFile(String name) throws RemoteException;
+
+    public void stop() throws RemoteException;
+
+    public void restart() throws RemoteException;
 }

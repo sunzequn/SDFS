@@ -22,7 +22,6 @@ public class SockServer {
     // 用于回调
     private IDataNodeAction nodeAction;
     private int port;
-    Set<String> ids = new HashSet<>();
     private Map<String, Socket> socketMap = new HashMap<>();
     protected ServerSocket serverSocket;
 
@@ -34,10 +33,6 @@ public class SockServer {
     public void start() {
         try {
             serverSocket = new ServerSocket(port);
-            System.out.println(serverSocket);
-            for (NodeInfo nodeInfo : nodeAction.getActiveNodesInfo()) {
-                ids.add(nodeInfo.getId());
-            }
             ServerThread serverThread = new ServerThread(this, serverSocket);
             serverThread.start();
         } catch (IOException e) {
@@ -62,6 +57,7 @@ public class SockServer {
         nodeAction.updateActiveNodesLastTime(keepAlive.getSelfInfo().getId(), System.currentTimeMillis());
         String clientId = keepAlive.getSelfInfo().getId();
         // ids保存左右节点
+        Set<String> ids = nodeAction.getActiveNodeIds();
         if (!ids.contains(clientId)) {
             ids.add(clientId);
             socketMap.put(clientId, socket);
@@ -77,6 +73,7 @@ public class SockServer {
 
 
     public void handleNewFile(FileMeta fileMeta) {
+        Set<String> ids = nodeAction.getActiveNodeIds();
         // 转发给其他节点
         System.out.println("leader 收到新文件：" + fileMeta.getName() + ", 转发给" + ids);
         System.out.println(fileMeta);

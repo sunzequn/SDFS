@@ -10,7 +10,6 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
-import java.util.Calendar;
 import java.util.List;
 
 /**
@@ -52,6 +51,7 @@ public class RemoteImpl extends UnicastRemoteObject implements IRemote {
     @Override
     public String getNodeHost() throws RemoteException {
         NodeInfo node = nodeAction.getFreeNode();
+        if (node == null) return null;
         return node.getIp() + ":" + (node.getPort() + 1);
     }
 
@@ -68,6 +68,21 @@ public class RemoteImpl extends UnicastRemoteObject implements IRemote {
     @Override
     public int getTotalUserNum() throws RemoteException {
         return nodeAction.getTotalUserNum();
+    }
+
+    @Override
+    public byte[] downloadFile(String name) throws RemoteException {
+        return nodeAction.downloadFile(name);
+    }
+
+    @Override
+    public void stop() throws RemoteException {
+        nodeAction.stop();
+    }
+
+    @Override
+    public void restart() throws RemoteException {
+        nodeAction.restart();
     }
 
 

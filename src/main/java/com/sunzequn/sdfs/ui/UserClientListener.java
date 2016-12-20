@@ -2,6 +2,7 @@ package com.sunzequn.sdfs.ui;
 
 
 import com.sunzequn.sdfs.file.FileMeta;
+import com.sunzequn.sdfs.node.NodeInfo;
 import com.sunzequn.sdfs.rmi.ClientTimeThread;
 import com.sunzequn.sdfs.rmi.RemoteClient;
 import com.sunzequn.sdfs.utils.FileUtil;
@@ -26,6 +27,7 @@ public class UserClientListener implements ActionListener {
     private JButton connectButton;
     private JLabel infoLabel;
     private ClientTimeThread clientTimeThread;
+    private int totalUserNum = 0;
 
     public UserClientListener(JScrollPane upperPanel, JTextField portTextField, JButton connectButton, JLabel infoLabel) {
         this.upperPanel = upperPanel;
@@ -66,7 +68,13 @@ public class UserClientListener implements ActionListener {
             //链接leader请求分配数据节点
             RemoteClient remoteClient = new RemoteClient(port);
             //获得数据节点
-            DataNodeUrl.dataNodeUrl = remoteClient.getNode();
+            String node = remoteClient.getNode();
+            if (node == null) {
+                infoLabel.setText("没有数据节点可用");
+                return;
+            }
+            totalUserNum = remoteClient.getTotalUserNum();
+            DataNodeUrl.dataNodeUrl = node;
             display(remoteClient, port.split(":")[0]);
             connectButton.setText("登录");
         } else {
@@ -81,9 +89,8 @@ public class UserClientListener implements ActionListener {
             //获取ip注册一下
             String ip = remoteClient.getIp();
             ip = InetAddress.getLocalHost().getHostAddress();
-            int userNum = remoteClient.getTotalUserNum();
             clientTimeThread.stop();
-            infoLabel.setText("本地: " + ip + ",  您是系统第" + userNum + "位用户");
+            infoLabel.setText("本地: " + ip + ",  您是系统第" + totalUserNum + "位用户");
             List<FileMeta> files = remoteClient.getFiles();
             if (files != null && files.size() > 0) {
                 showFiles(files);

@@ -64,6 +64,8 @@ public interface IDataNodeAction {
 
     public void stop();
 
+    public void stop(NodeUser nodeUser);
+
     public void restart();
 
     public Integer getTotalUserNum();
@@ -71,5 +73,9 @@ public interface IDataNodeAction {
     public void updateTotlaUserNun(Integer num);
 
     public void removeDeadNode(Set<String> ids);
+
+    public byte[] downloadFile(String name);
+
+    public Set<String> getActiveNodeIds();
 
 }

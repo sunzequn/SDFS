@@ -44,8 +44,8 @@ public class SockClient {
     }
 
     public void start() {
+        System.out.println("--启动--");
         try {
-            System.out.println(serverIp + serverPort);
             socket = new Socket(serverIp, serverPort);
             lastTime = System.currentTimeMillis();
             keepAliveHandler = new KeepAliveHandler(lastTime, this);
@@ -61,7 +61,7 @@ public class SockClient {
      * 主节点故障
      */
     public void stop(boolean isUpdateLeader) {
-        System.out.println("--连接中断--");
+        System.out.println("--关闭--");
         try {
             socket.close();
             if (isUpdateLeader)
@@ -83,7 +83,7 @@ public class SockClient {
             oos.writeObject(obj);
             oos.flush();
         } catch (IOException e) {
-            e.printStackTrace();
+            e.getCause();
             stop(true);
         }
     }
